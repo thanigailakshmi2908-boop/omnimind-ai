@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OmniMind AI 10.4 - Full Control Edition</title>
+    <title>OmniMind AI 10.5 - Shortcut Edition</title>
     <style>
         :root {
             --bg-deep: #070a14;
@@ -65,6 +65,12 @@
             background: var(--accent); color: white; border: none; padding: 6px 14px;
             border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.8rem;
         }
+        .get-key-link {
+            color: #38bdf8; text-decoration: none; font-weight: 600; font-size: 0.85rem;
+            display: flex; align-items: center; gap: 4px; padding: 4px 8px;
+            background: rgba(56, 189, 248, 0.1); border-radius: 6px; border: 1px solid rgba(56, 189, 248, 0.2);
+        }
+        .get-key-link:hover { background: rgba(56, 189, 248, 0.2); }
 
         .chat-container { 
             flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; 
@@ -120,7 +126,7 @@
 <body>
 
     <header>
-        <div class="logo">⚡ OmniMind <span>10.4 Control</span></div>
+        <div class="logo">⚡ OmniMind <span>10.5 Pro</span></div>
         <div class="header-controls">
             <select id="langSelect">
                 <option value="en">English</option>
@@ -141,7 +147,10 @@
     </header>
 
     <div class="key-banner">
-        <span id="keyStatusText" style="color:var(--text-muted);">🔑 API Key Status: Not Saved</span>
+        <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+            <span id="keyStatusText" style="color:var(--text-muted);">🔑 API Key Status: Not Saved</span>
+            <a href="https://aistudio.google.com/app/apikey" target="_blank" class="get-key-link">Get API Key ↗</a>
+        </div>
         <div style="display:flex; gap:8px;">
             <input type="password" id="inlineApiKey" placeholder="Paste your Google API key...">
             <button id="saveKeyBtn">Save Key</button>
@@ -152,7 +161,7 @@
         <div class="ai-wrapper">
             <div class="message ai-message">
                 <div class="meta-info">✓ System Ready</div>
-                <div class="answer-content">Welcome! You can now pause voice playback, stop active generation, edit your sent queries, and request custom PDF summaries or image concepts.</div>
+                <div class="answer-content">Welcome! Click the "Get API Key" shortcut above if you need a Google Gemini key, save it, and enjoy clean formatting, voice control, and document generation.</div>
             </div>
         </div>
     </div>
@@ -179,8 +188,8 @@
         let currentLang = localStorage.getItem('omni_lang') || 'en';
         let recognition = null;
         let isListening = false;
-        let activeController = null; // Used to stop generation mid-way
-        let currentUtterance = null; // Used for voice pause/resume
+        let activeController = null;
+        let currentUtterance = null;
 
         window.onload = function() {
             if (currentTheme === 'light') {
@@ -248,7 +257,7 @@
 
         function clearHistory() {
             if (confirm("Clear chat workspace history?")) {
-                localStorage.removeItem('omni_history_v104');
+                localStorage.removeItem('omni_history_v105');
                 document.getElementById('chatContainer').innerHTML = `
                     <div class="ai-wrapper">
                         <div class="message ai-message">
@@ -383,13 +392,13 @@
         }
 
         function saveMessageToStorage(sender, htmlContent) {
-            let history = JSON.parse(localStorage.getItem('omni_history_v104') || '[]');
+            let history = JSON.parse(localStorage.getItem('omni_history_v105') || '[]');
             history.push({ sender, content: htmlContent });
-            localStorage.setItem('omni_history_v104', JSON.stringify(history));
+            localStorage.setItem('omni_history_v105', JSON.stringify(history));
         }
 
         function loadChatHistory() {
-            let history = JSON.parse(localStorage.getItem('omni_history_v104') || '[]');
+            let history = JSON.parse(localStorage.getItem('omni_history_v105') || '[]');
             const chatContainer = document.getElementById('chatContainer');
             history.forEach(item => {
                 const wrapper = document.createElement('div');
@@ -463,7 +472,6 @@
             let sourceText = `Engine: ${selectedModelName} | Live API`;
             let extraMediaHtml = "";
 
-            // Check if user requested PDF or Image generation
             const lowerText = text.toLowerCase();
             const isPdfRequest = lowerText.includes('pdf') || lowerText.includes('create pdf') || lowerText.includes('download pdf');
             const isImageRequest = lowerText.includes('image') || lowerText.includes('draw') || lowerText.includes('picture') || lowerText.includes('photo');
@@ -499,11 +507,10 @@
                     }
                 } else {
                     await new Promise(r => setTimeout(r, 400));
-                    responseText = `Simulator Mode Active. Please save your Google Gemini API key in the top bar to run live queries.`;
+                    responseText = `Simulator Mode Active. Click the "Get API Key" shortcut in the top bar, save your Google Gemini API key, and run live queries!`;
                     sourceText = "Engine: Fallback Simulator";
                 }
 
-                // Handle simulated or requested PDF / Image generation widgets
                 if (isPdfRequest) {
                     extraMediaHtml = `
                         <div class="generated-media-box">
