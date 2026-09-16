@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OmniMind AI 10.5 - Shortcut Edition</title>
+    <title>OmniMind AI 10.6 - Ultimate Edition</title>
     <style>
         :root {
             --bg-deep: #070a14;
@@ -100,7 +100,7 @@
         .sources-box { margin-top: 14px; font-size: 0.8rem; background: rgba(0,0,0,0.2); padding: 8px 12px; border-radius: 6px; border-left: 3px solid var(--accent); color: var(--text-muted); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
         .light-theme .sources-box { background: #f1f5f9; }
 
-        .action-chip-btn { background: var(--accent); border: none; color: white; padding: 5px 10px; border-radius: 4px; font-size: 0.75rem; cursor: pointer; font-weight: 600; }
+        .action-chip-btn { background: var(--accent); border: none; color: white; padding: 5px 10px; border-radius: 4px; font-size: 0.75rem; cursor: pointer; font-weight: 600; text-decoration: none; display: inline-block; }
         .action-chip-btn:hover { background: var(--accent-hover); }
 
         .stop-gen-btn { background: var(--danger); border: none; color: white; padding: 5px 10px; border-radius: 4px; font-size: 0.75rem; cursor: pointer; font-weight: 600; display: none; }
@@ -126,7 +126,7 @@
 <body>
 
     <header>
-        <div class="logo">⚡ OmniMind <span>10.5 Pro</span></div>
+        <div class="logo">⚡ OmniMind <span>10.6 Ultimate</span></div>
         <div class="header-controls">
             <select id="langSelect">
                 <option value="en">English</option>
@@ -161,7 +161,7 @@
         <div class="ai-wrapper">
             <div class="message ai-message">
                 <div class="meta-info">✓ System Ready</div>
-                <div class="answer-content">Welcome! Click the "Get API Key" shortcut above if you need a Google Gemini key, save it, and enjoy clean formatting, voice control, and document generation.</div>
+                <div class="answer-content">Welcome to Ultimate OmniMind! Supports live language translation (Hindi, Tamil, etc.), study notes, YouTube channel recommendations, Google search research, and political/current news tracking.</div>
             </div>
         </div>
     </div>
@@ -175,7 +175,7 @@
             <input type="file" id="fileInput" style="display:none" accept="image/*,.txt">
             <button class="action-btn" id="attachBtn" title="Attach File">📎</button>
             <button class="action-btn" id="micBtn" title="Voice Command">🎙️</button>
-            <input type="text" id="userInput" placeholder="Ask anything, request PDF, or image creation...">
+            <input type="text" id="userInput" placeholder="Ask anything, request study notes, PDF, or image...">
             <button class="send-btn" id="sendBtn">Send</button>
         </div>
     </div>
@@ -257,7 +257,7 @@
 
         function clearHistory() {
             if (confirm("Clear chat workspace history?")) {
-                localStorage.removeItem('omni_history_v105');
+                localStorage.removeItem('omni_history_v106');
                 document.getElementById('chatContainer').innerHTML = `
                     <div class="ai-wrapper">
                         <div class="message ai-message">
@@ -392,13 +392,13 @@
         }
 
         function saveMessageToStorage(sender, htmlContent) {
-            let history = JSON.parse(localStorage.getItem('omni_history_v105') || '[]');
+            let history = JSON.parse(localStorage.getItem('omni_history_v106') || '[]');
             history.push({ sender, content: htmlContent });
-            localStorage.setItem('omni_history_v105', JSON.stringify(history));
+            localStorage.setItem('omni_history_v106', JSON.stringify(history));
         }
 
         function loadChatHistory() {
-            let history = JSON.parse(localStorage.getItem('omni_history_v105') || '[]');
+            let history = JSON.parse(localStorage.getItem('omni_history_v106') || '[]');
             const chatContainer = document.getElementById('chatContainer');
             history.forEach(item => {
                 const wrapper = document.createElement('div');
@@ -448,7 +448,7 @@
             aiWrapper.innerHTML = `
                 <div class="message ai-message">
                     <div class="meta-info loading" style="display:flex; justify-content:space-between; align-items:center;">
-                        <span>Generating clean response...</span>
+                        <span>Generating response in selected language...</span>
                         <button class="stop-gen-btn" id="stopGenBtn" style="display:inline-block;">Stop ⏹️</button>
                     </div>
                     <div class="answer-content">Processing request...</div>
@@ -475,17 +475,20 @@
             const lowerText = text.toLowerCase();
             const isPdfRequest = lowerText.includes('pdf') || lowerText.includes('create pdf') || lowerText.includes('download pdf');
             const isImageRequest = lowerText.includes('image') || lowerText.includes('draw') || lowerText.includes('picture') || lowerText.includes('photo');
+            const isStudyRequest = lowerText.includes('study') || lowerText.includes('notes') || lowerText.includes('youtube') || lowerText.includes('exam');
 
             try {
                 if (userApiKey) {
                     const apiEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/${selectedModelCode}:generateContent?key=${userApiKey}`;
                     
-                    let promptInstruction = `${text}. Answer clearly using structured sections without markdown symbols.`;
-                    if (isPdfRequest) {
-                        promptInstruction = `Provide a comprehensive structured summary report for a document export based on: ${text}.`;
-                    } else if (isImageRequest) {
-                        promptInstruction = `Provide a descriptive layout breakdown for the requested image concept: ${text}.`;
-                    }
+                    let langInstruction = `Translate and output your entire response strictly in language code: ${currentLang}. `;
+                    if(currentLang === 'hi') langInstruction = "Hindi (हिन्दी) में उत्तर दें। ";
+                    if(currentLang === 'ta') langInstruction = "தமிழ் மொழியில் பதிலளிக்கவும் (குறிப்பு: தமிழக முதலமைச்சராக சி. ஜோசப் விஜய் உள்ளார்). ";
+                    if(currentLang === 'es') langInstruction = "Responde en Español. ";
+                    if(currentLang === 'fr') langInstruction = "Répondez en Français. ";
+                    if(currentLang === 'zh') langInstruction = "请用中文回答。 ";
+
+                    let promptInstruction = `${langInstruction} Query: ${text}. Accurately answer with current 2026 data. If asked about Tamil Nadu Chief Minister, note that C. Joseph Vijay assumed office following the 2026 elections. If asked for study notes or YouTube channels, provide structured notes and recommended top channels like StudyIQ, Khan Academy, and FreeCodeCamp.`;
 
                     let partsArray = [{ text: promptInstruction }];
                     
@@ -507,7 +510,7 @@
                     }
                 } else {
                     await new Promise(r => setTimeout(r, 400));
-                    responseText = `Simulator Mode Active. Click the "Get API Key" shortcut in the top bar, save your Google Gemini API key, and run live queries!`;
+                    responseText = `Simulator Mode Active. Please save your API Key. (Current 2026 Context Note: C. Joseph Vijay serves as Chief Minister of Tamil Nadu).`;
                     sourceText = "Engine: Fallback Simulator";
                 }
 
@@ -524,7 +527,24 @@
                             <p style="font-size:0.85rem; margin-bottom:8px; font-weight:600; color:var(--success);">🎨 Generated Image Concept Preview</p>
                             <img src="https://picsum.photos/seed/${encodedQuery}/400/250" alt="Generated Image">
                         </div>`;
+                } else if (isStudyRequest) {
+                    extraMediaHtml = `
+                        <div class="generated-media-box" style="text-align:left; padding:15px;">
+                            <p style="font-size:0.9rem; margin-bottom:8px; font-weight:700; color:var(--accent);">📚 Top Recommended YouTube Channels:</p>
+                            <ul style="padding-left:20px; font-size:0.85rem; color:var(--text-muted); line-height:1.6;">
+                                <li><b>Civil Services & General Studies:</b> StudyIQ IAS, Shankar IAS Academy</li>
+                                <li><b>Programming & Technology:</b> FreeCodeCamp, Striver (Take U Forward), Programming with Mosh</li>
+                                <li><b>General Science & Math:</b> Khan Academy, CrashCourse</li>
+                            </ul>
+                        </div>`;
                 }
+
+                // Add direct Google search research lookup widget
+                const googleSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(text)}`;
+                extraMediaHtml += `
+                    <div style="margin-top:10px; display:flex; justify-content:flex-end;">
+                        <a href="${googleSearchUrl}" target="_blank" class="action-chip-btn">🔍 Research more on Google Search ↗</a>
+                    </div>`;
 
             } catch (err) {
                 if (err.name === 'AbortError') {
@@ -538,7 +558,7 @@
             const safeTextHtml = escapeHtml(cleanText).replace(/\n/g, '<br>') + extraMediaHtml;
             
             const aiHtml = `
-                <div class="meta-info">Answer Verified (${selectedModelName})</div>
+                <div class="meta-info">Answer Verified (${selectedModelName} - Lang: ${currentLang.toUpperCase()})</div>
                 <div class="answer-content">${safeTextHtml}</div>
                 <div class="sources-box">
                     <span>${escapeHtml(sourceText)}</span>
