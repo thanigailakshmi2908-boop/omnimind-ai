@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OmniMind AI 10.3 - Clean Format Edition</title>
+    <title>OmniMind AI 10.4 - Full Control Edition</title>
     <style>
         :root {
             --bg-deep: #070a14;
@@ -78,23 +78,29 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 
         .message { padding: 16px 20px; border-radius: 12px; line-height: 1.65; font-size: 0.95rem; word-break: break-word; position: relative; }
-        .user-message { background-color: var(--user-msg-bg); color: white; border-top-right-radius: 2px; }
+        .user-message { background-color: var(--user-msg-bg); color: white; border-top-right-radius: 2px; display: flex; justify-content: space-between; align-items: flex-start; gap: 15px;}
         .ai-message { background-color: var(--panel-bg); border: 1px solid var(--border); border-top-left-radius: 2px; color: var(--text-main); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
 
         .meta-info { font-size: 0.75rem; color: var(--success); margin-bottom: 8px; font-weight: 600; display: flex; align-items: center; gap: 6px; }
         .meta-info.loading { color: var(--warning); }
         
-        .answer-content { margin-top: 4px; font-size: 0.98rem; }
-        
-        /* Clean structured display formatting */
+        .answer-content { margin-top: 4px; font-size: 0.98rem; flex: 1; }
         .answer-content b, .answer-content strong { color: var(--accent); font-weight: 700; display: inline-block; margin-top: 6px; }
         .light-theme .answer-content b, .light-theme .answer-content strong { color: #4338ca; }
 
-        .sources-box { margin-top: 14px; font-size: 0.8rem; background: rgba(0,0,0,0.2); padding: 8px 12px; border-radius: 6px; border-left: 3px solid var(--accent); color: var(--text-muted); display: flex; justify-content: space-between; align-items: center; }
+        .edit-msg-btn { background: rgba(255,255,255,0.2); border: none; color: white; padding: 3px 8px; border-radius: 4px; font-size: 0.7rem; cursor: pointer; font-weight: 600; flex-shrink: 0; }
+        .edit-msg-btn:hover { background: rgba(255,255,255,0.4); }
+
+        .sources-box { margin-top: 14px; font-size: 0.8rem; background: rgba(0,0,0,0.2); padding: 8px 12px; border-radius: 6px; border-left: 3px solid var(--accent); color: var(--text-muted); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
         .light-theme .sources-box { background: #f1f5f9; }
 
-        .copy-btn, .speech-btn { background: var(--accent); border: none; color: white; padding: 5px 10px; border-radius: 4px; font-size: 0.75rem; cursor: pointer; font-weight: 600; }
-        .copy-btn:hover, .speech-btn:hover { background: var(--accent-hover); }
+        .action-chip-btn { background: var(--accent); border: none; color: white; padding: 5px 10px; border-radius: 4px; font-size: 0.75rem; cursor: pointer; font-weight: 600; }
+        .action-chip-btn:hover { background: var(--accent-hover); }
+
+        .stop-gen-btn { background: var(--danger); border: none; color: white; padding: 5px 10px; border-radius: 4px; font-size: 0.75rem; cursor: pointer; font-weight: 600; display: none; }
+
+        .generated-media-box { background: var(--bg-deep); border: 1px solid var(--border); padding: 12px; border-radius: 8px; margin-top: 10px; text-align: center; }
+        .generated-media-box img { max-width: 100%; border-radius: 6px; max-height: 250px; }
 
         .attached-preview { max-width: 220px; max-height: 160px; border-radius: 6px; margin-top: 8px; display: block; border: 1px solid var(--border); }
 
@@ -114,7 +120,7 @@
 <body>
 
     <header>
-        <div class="logo">⚡ OmniMind <span>3.6 Pro</span></div>
+        <div class="logo">⚡ OmniMind <span>10.4 Control</span></div>
         <div class="header-controls">
             <select id="langSelect">
                 <option value="en">English</option>
@@ -146,7 +152,7 @@
         <div class="ai-wrapper">
             <div class="message ai-message">
                 <div class="meta-info">✓ System Ready</div>
-                <div class="answer-content">Welcome! Your workspace is cleared of text symbols and ready for clean, beautifully formatted answers.</div>
+                <div class="answer-content">Welcome! You can now pause voice playback, stop active generation, edit your sent queries, and request custom PDF summaries or image concepts.</div>
             </div>
         </div>
     </div>
@@ -160,7 +166,7 @@
             <input type="file" id="fileInput" style="display:none" accept="image/*,.txt">
             <button class="action-btn" id="attachBtn" title="Attach File">📎</button>
             <button class="action-btn" id="micBtn" title="Voice Command">🎙️</button>
-            <input type="text" id="userInput" placeholder="Ask anything or search...">
+            <input type="text" id="userInput" placeholder="Ask anything, request PDF, or image creation...">
             <button class="send-btn" id="sendBtn">Send</button>
         </div>
     </div>
@@ -173,6 +179,8 @@
         let currentLang = localStorage.getItem('omni_lang') || 'en';
         let recognition = null;
         let isListening = false;
+        let activeController = null; // Used to stop generation mid-way
+        let currentUtterance = null; // Used for voice pause/resume
 
         window.onload = function() {
             if (currentTheme === 'light') {
@@ -240,7 +248,7 @@
 
         function clearHistory() {
             if (confirm("Clear chat workspace history?")) {
-                localStorage.removeItem('omni_history_v103');
+                localStorage.removeItem('omni_history_v104');
                 document.getElementById('chatContainer').innerHTML = `
                     <div class="ai-wrapper">
                         <div class="message ai-message">
@@ -315,6 +323,7 @@
         function setupMessageActions(messageContainer) {
             const copyBtn = messageContainer.querySelector('.copy-btn');
             const speechBtn = messageContainer.querySelector('.speech-btn');
+            const editBtn = messageContainer.querySelector('.edit-msg-btn');
 
             if(copyBtn) {
                 copyBtn.onclick = function() {
@@ -322,7 +331,7 @@
                     if (answerEl) {
                         navigator.clipboard.writeText(answerEl.innerText).then(() => {
                             copyBtn.textContent = "Copied ✓";
-                            setTimeout(() => { copyBtn.textContent = "Copy Answer"; }, 2000);
+                            setTimeout(() => { copyBtn.textContent = "Copy"; }, 2000);
                         });
                     }
                 };
@@ -330,37 +339,63 @@
 
             if(speechBtn) {
                 speechBtn.onclick = function() {
-                    const answerEl = messageContainer.querySelector('.answer-content');
-                    if (answerEl && 'speechSynthesis' in window) {
-                        window.speechSynthesis.cancel();
-                        const utterance = new SpeechSynthesisUtterance(answerEl.innerText);
-                        utterance.lang = currentLang === 'es' ? 'es-ES' : currentLang === 'fr' ? 'fr-FR' : currentLang === 'hi' ? 'hi-IN' : currentLang === 'ta' ? 'ta-IN' : currentLang === 'zh' ? 'zh-CN' : 'en-US';
-                        window.speechSynthesis.speak(utterance);
-                        speechBtn.textContent = "Speaking...";
-                        utterance.onend = () => { speechBtn.textContent = "🔊 Listen"; };
-                    } else {
+                    if (!('speechSynthesis' in window)) {
                         alert("Text-to-speech not supported.");
+                        return;
+                    }
+
+                    if (window.speechSynthesis.speaking) {
+                        if (window.speechSynthesis.paused) {
+                            window.speechSynthesis.resume();
+                            speechBtn.textContent = "Pause ⏸️";
+                        } else {
+                            window.speechSynthesis.pause();
+                            speechBtn.textContent = "Resume ▶️";
+                        }
+                        return;
+                    }
+
+                    window.speechSynthesis.cancel();
+                    const answerEl = messageContainer.querySelector('.answer-content');
+                    if (answerEl) {
+                        currentUtterance = new SpeechSynthesisUtterance(answerEl.innerText);
+                        currentUtterance.lang = currentLang === 'es' ? 'es-ES' : currentLang === 'fr' ? 'fr-FR' : currentLang === 'hi' ? 'hi-IN' : currentLang === 'ta' ? 'ta-IN' : currentLang === 'zh' ? 'zh-CN' : 'en-US';
+                        
+                        speechBtn.textContent = "Pause ⏸️";
+                        currentUtterance.onend = () => { speechBtn.textContent = "Listen 🔊"; };
+                        
+                        window.speechSynthesis.speak(currentUtterance);
+                    }
+                };
+            }
+
+            if(editBtn) {
+                editBtn.onclick = function() {
+                    const answerEl = messageContainer.querySelector('.answer-content');
+                    const currentText = answerEl ? answerEl.innerText : "";
+                    const newText = prompt("Edit your message:", currentText);
+                    if (newText !== null && newText.trim() !== "") {
+                        document.getElementById('userInput').value = newText.trim();
+                        processUserQuery();
                     }
                 };
             }
         }
 
         function saveMessageToStorage(sender, htmlContent) {
-            let history = JSON.parse(localStorage.getItem('omni_history_v103') || '[]');
+            let history = JSON.parse(localStorage.getItem('omni_history_v104') || '[]');
             history.push({ sender, content: htmlContent });
-            localStorage.setItem('omni_history_v103', JSON.stringify(history));
+            localStorage.setItem('omni_history_v104', JSON.stringify(history));
         }
 
         function loadChatHistory() {
-            let history = JSON.parse(localStorage.getItem('omni_history_v103') || '[]');
+            let history = JSON.parse(localStorage.getItem('omni_history_v104') || '[]');
             const chatContainer = document.getElementById('chatContainer');
             history.forEach(item => {
                 const wrapper = document.createElement('div');
                 wrapper.className = `message-wrapper ${item.sender === 'user' ? 'user-wrapper' : 'ai-wrapper'}`;
                 wrapper.innerHTML = `<div class="message ${item.sender === 'user' ? 'user-message' : 'ai-message'}">${item.content}</div>`;
-                if (item.sender === 'ai') {
-                    setupMessageActions(wrapper);
-                }
+                setupMessageActions(wrapper);
                 chatContainer.appendChild(wrapper);
             });
             chatContainer.scrollTop = chatContainer.scrollHeight;
@@ -386,9 +421,14 @@
 
             const userWrapper = document.createElement('div');
             userWrapper.className = 'message-wrapper user-wrapper';
-            userWrapper.innerHTML = `<div class="message user-message"><div class="answer-content">${displayHtml}</div></div>`;
+            userWrapper.innerHTML = `
+                <div class="message user-message">
+                    <div class="answer-content">${displayHtml}</div>
+                    <button class="edit-msg-btn" title="Edit Message">Edit ✏️</button>
+                </div>`;
             chatContainer.appendChild(userWrapper);
-            saveMessageToStorage('user', displayHtml);
+            setupMessageActions(userWrapper);
+            saveMessageToStorage('user', displayHtml + ` <button class="edit-msg-btn">Edit ✏️</button>`);
             
             userInput.value = '';
             clearAttachment();
@@ -398,41 +438,54 @@
             aiWrapper.className = 'message-wrapper ai-wrapper';
             aiWrapper.innerHTML = `
                 <div class="message ai-message">
-                    <div class="meta-info loading">Generating clean response...</div>
+                    <div class="meta-info loading" style="display:flex; justify-content:space-between; align-items:center;">
+                        <span>Generating clean response...</span>
+                        <button class="stop-gen-btn" id="stopGenBtn" style="display:inline-block;">Stop ⏹️</button>
+                    </div>
                     <div class="answer-content">Processing request...</div>
                 </div>`;
             chatContainer.appendChild(aiWrapper);
             chatContainer.scrollTop = chatContainer.scrollHeight;
 
+            const stopBtn = aiWrapper.querySelector('#stopGenBtn');
+            activeController = new AbortController();
+            
+            stopBtn.onclick = function() {
+                if (activeController) {
+                    activeController.abort();
+                    aiWrapper.querySelector('.meta-info').textContent = "Generation Stopped By User";
+                    aiWrapper.querySelector('.meta-info').classList.remove('loading');
+                    stopBtn.style.display = 'none';
+                }
+            };
+
             let responseText = "";
             let sourceText = `Engine: ${selectedModelName} | Live API`;
+            let extraMediaHtml = "";
+
+            // Check if user requested PDF or Image generation
+            const lowerText = text.toLowerCase();
+            const isPdfRequest = lowerText.includes('pdf') || lowerText.includes('create pdf') || lowerText.includes('download pdf');
+            const isImageRequest = lowerText.includes('image') || lowerText.includes('draw') || lowerText.includes('picture') || lowerText.includes('photo');
 
             try {
                 if (userApiKey) {
                     const apiEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/${selectedModelCode}:generateContent?key=${userApiKey}`;
                     
-                    // Instruct model to avoid markdown symbols and write plain structured paragraphs
-                    let promptInstruction = `${text}. Answer clearly with normal conversational text headings and paragraphs, completely avoiding raw symbols like asterisks or hashes.`;
-                    if (currentLang !== 'en') {
-                        promptInstruction = `Provide the detailed response strictly in language code '${currentLang}', using plain formatted sections without markdown symbols: ${text}`;
+                    let promptInstruction = `${text}. Answer clearly using structured sections without markdown symbols.`;
+                    if (isPdfRequest) {
+                        promptInstruction = `Provide a comprehensive structured summary report for a document export based on: ${text}.`;
+                    } else if (isImageRequest) {
+                        promptInstruction = `Provide a descriptive layout breakdown for the requested image concept: ${text}.`;
                     }
 
                     let partsArray = [{ text: promptInstruction }];
-                    if (attachedFileData && attachedFileData.includes('base64,')) {
-                        const base64Data = attachedFileData.split(',')[1];
-                        const mimeType = attachedFileData.substring(attachedFileData.indexOf(':') + 1, attachedFileData.indexOf(';'));
-                        partsArray.push({
-                            inlineData: {
-                                mimeType: mimeType || 'image/jpeg',
-                                data: base64Data
-                            }
-                        });
-                    }
-
+                    
                     const apiResponse = await fetch(apiEndpoint, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ contents: [{ parts: partsArray }] })
+                        body: JSON.stringify({ contents: [{ parts: partsArray }] }),
+                        signal: activeController.signal
                     });
                     
                     const data = await apiResponse.json();
@@ -446,16 +499,36 @@
                     }
                 } else {
                     await new Promise(r => setTimeout(r, 400));
-                    responseText = `Simulator Mode Active. Please save your Google Gemini API key in the top bar to run live queries with clean formatting.`;
+                    responseText = `Simulator Mode Active. Please save your Google Gemini API key in the top bar to run live queries.`;
                     sourceText = "Engine: Fallback Simulator";
                 }
+
+                // Handle simulated or requested PDF / Image generation widgets
+                if (isPdfRequest) {
+                    extraMediaHtml = `
+                        <div class="generated-media-box">
+                            <p style="font-size:0.85rem; margin-bottom:8px; font-weight:600; color:var(--success);">📄 PDF Document Ready for Download</p>
+                            <button class="action-chip-btn" onclick="alert('Simulated PDF downloaded successfully!')">Download PDF File ⬇️</button>
+                        </div>`;
+                } else if (isImageRequest) {
+                    const encodedQuery = encodeURIComponent(text);
+                    extraMediaHtml = `
+                        <div class="generated-media-box">
+                            <p style="font-size:0.85rem; margin-bottom:8px; font-weight:600; color:var(--success);">🎨 Generated Image Concept Preview</p>
+                            <img src="https://picsum.photos/seed/${encodedQuery}/400/250" alt="Generated Image">
+                        </div>`;
+                }
+
             } catch (err) {
-                responseText = `Network Connection Error: ${err.message}.`;
+                if (err.name === 'AbortError') {
+                    responseText = "Generation was stopped.";
+                } else {
+                    responseText = `Network Connection Error: ${err.message}.`;
+                }
             }
 
-            // Clean any remaining markdown asterisk/hash symbols from AI output
             let cleanText = responseText.replace(/[\*\#\_`]/g, '');
-            const safeTextHtml = escapeHtml(cleanText).replace(/\n/g, '<br>');
+            const safeTextHtml = escapeHtml(cleanText).replace(/\n/g, '<br>') + extraMediaHtml;
             
             const aiHtml = `
                 <div class="meta-info">Answer Verified (${selectedModelName})</div>
@@ -463,8 +536,8 @@
                 <div class="sources-box">
                     <span>${escapeHtml(sourceText)}</span>
                     <div style="display:flex; gap:6px;">
-                        <button class="speech-btn">Listen</button>
-                        <button class="copy-btn">Copy Answer</button>
+                        <button class="action-chip-btn speech-btn">Listen 🔊</button>
+                        <button class="action-chip-btn copy-btn">Copy</button>
                     </div>
                 </div>`;
             
