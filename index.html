@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OmniMind Ultimate - Clean Academic Suite</title>
+    <title>OmniMind Ultimate - Academic Suite</title>
     <style>
         :root {
             --bg-deep: #070a14;
@@ -101,10 +101,10 @@
         
         .answer-content { margin-top: 4px; font-size: 0.98rem; flex: 1; }
         
-        /* Structured Question & Answer Layout Styling */
-        .academic-q-box { font-size: 1.05rem; font-weight: 700; color: var(--accent); margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
-        .academic-section-title { font-size: 1rem; font-weight: 700; color: var(--text-main); margin-top: 14px; margin-bottom: 6px; }
-        .academic-point { margin-bottom: 8px; padding-left: 12px; border-left: 2px solid var(--accent); }
+        /* Strict Separated Layout matching reference style */
+        .academic-q-box { font-size: 1.1rem; font-weight: 700; color: #38bdf8; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+        .academic-heading-block { font-size: 1.02rem; font-weight: 700; color: var(--accent); margin-top: 18px; margin-bottom: 6px; letter-spacing: 0.3px; }
+        .academic-answer-block { font-size: 0.96rem; color: var(--text-main); margin-bottom: 12px; padding-left: 12px; border-left: 3px solid var(--accent); line-height: 1.7; background: rgba(255, 255, 255, 0.01); }
 
         .citation-badge { background: rgba(99, 102, 241, 0.15); color: #818cf8; padding: 1px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: 700; text-decoration: none; border: 1px solid rgba(99, 102, 241, 0.3); vertical-align: super; }
         .sources-box { margin-top: 14px; font-size: 0.8rem; background: rgba(0,0,0,0.2); padding: 8px 12px; border-radius: 6px; border-left: 3px solid var(--accent); color: var(--text-muted); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
@@ -167,7 +167,7 @@
             <div class="ai-wrapper">
                 <div class="message ai-message">
                     <div class="meta-info">✓ Academic Suite Active</div>
-                    <div class="answer-content">Ready for exam questions. Answers will be cleanly separated into Question, Headings, and Bullet points without markdown symbols.</div>
+                    <div class="answer-content">Ready for exam questions. Headings and answers are fully separated, completely free of symbols like #, *, or +.</div>
                 </div>
             </div>
         </div>
@@ -178,7 +178,7 @@
                 <button id="closeArtifactBtn" style="background:transparent; border:none; color:var(--text-muted); cursor:pointer; font-weight:bold;">✕</button>
             </div>
             <div id="artifactContent" style="font-size:0.88rem; color:var(--text-muted); line-height:1.5;">
-                Clean exam question answers will render here automatically.
+                Clean separated question and answer breakdowns will render here automatically.
             </div>
         </div>
     </div>
@@ -261,7 +261,7 @@
 
         function clearHistory() {
             if (confirm("Clear chat workspace?")) {
-                localStorage.removeItem('omni_history_v109');
+                localStorage.removeItem('omni_history_v111');
                 document.getElementById('chatContainer').innerHTML = `<div class="ai-wrapper"><div class="message ai-message"><div class="meta-info">✓ Reset</div><div class="answer-content">Workspace cleared.</div></div></div>`;
             }
         }
@@ -314,13 +314,13 @@
         }
 
         function saveMessageToStorage(sender, htmlContent) {
-            let history = JSON.parse(localStorage.getItem('omni_history_v109') || '[]');
+            let history = JSON.parse(localStorage.getItem('omni_history_v111') || '[]');
             history.push({ sender, content: htmlContent });
-            localStorage.setItem('omni_history_v109', JSON.stringify(history));
+            localStorage.setItem('omni_history_v111', JSON.stringify(history));
         }
 
         function loadChatHistory() {
-            let history = JSON.parse(localStorage.getItem('omni_history_v109') || '[]');
+            let history = JSON.parse(localStorage.getItem('omni_history_v111') || '[]');
             const chatContainer = document.getElementById('chatContainer');
             history.forEach(item => {
                 const wrapper = document.createElement('div');
@@ -331,13 +331,13 @@
             chatContainer.scrollTop = chatContainer.scrollHeight;
         }
 
-        // Clean text parser to filter out raw markdown symbols (#, *, +)
+        // Strict cleaner to completely strip markdown symbols (#, *, +) and separate headings vs answer paragraphs cleanly
         function cleanMarkdownFormatting(rawText) {
             let cleaned = rawText
-                .replace(/#{1,6}\s?/g, '') // remove markdown headers
-                .replace(/\*\*/g, '')      // remove bold markers
-                .replace(/\*/g, '')        // remove asterisks
-                .replace(/\+/g, '');       // remove plus signs
+                .replace(/#{1,6}\s?/g, '') 
+                .replace(/\*\*/g, '')      
+                .replace(/\*/g, '')        
+                .replace(/\+/g, '');       
             
             let lines = cleaned.split('\n');
             let formattedHtml = '';
@@ -346,11 +346,11 @@
                 let trimmed = line.trim();
                 if (!trimmed) return;
                 
-                // If it looks like a section heading or numbered breakdown
-                if (trimmed.endsWith(':') || /^\d+\./.test(trimmed)) {
-                    formattedHtml += `<div class="academic-section-title">${escapeHtml(trimmed)}</div>`;
+                // Classify short lines or ending colons or numbered items as separate distinct headings
+                if (trimmed.endsWith(':') || /^\d+\./.test(trimmed) || (trimmed.length < 40 && !trimmed.includes('.'))) {
+                    formattedHtml += `<div class="academic-heading-block">${escapeHtml(trimmed)}</div>`;
                 } else {
-                    formattedHtml += `<div class="academic-point">${escapeHtml(trimmed)}</div>`;
+                    formattedHtml += `<div class="academic-answer-block">${escapeHtml(trimmed)}</div>`;
                 }
             });
             
@@ -385,10 +385,10 @@
             aiWrapper.innerHTML = `
                 <div class="message ai-message">
                     <div class="meta-info loading" style="display:flex; justify-content:space-between; align-items:center;">
-                        <span>Formatting academic exam answer...</span>
+                        <span>Structuring clear academic headings and answers...</span>
                         <button class="stop-gen-btn" id="stopGenBtn" style="display:inline-block;">Stop ⏹️</button>
                     </div>
-                    <div class="answer-content">Structuring question and breakdown sections...</div>
+                    <div class="answer-content">Formatting clean response...</div>
                 </div>`;
             chatContainer.appendChild(aiWrapper);
             chatContainer.scrollTop = chatContainer.scrollHeight;
@@ -398,13 +398,13 @@
             stopBtn.onclick = () => activeController.abort();
 
             let responseText = "";
-            let sourceText = `Engine: ${selectedModelName} | Structured Academic Mode`;
+            let sourceText = `Engine: ${selectedModelName} | Clean Separated Layout`;
 
             try {
                 if (userApiKey) {
                     const apiEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/${selectedModelCode}:generateContent?key=${userApiKey}`;
                     
-                    let systemInstruction = "You are an expert exam tutor. Provide clear structured exam answers with distinct headings and bullet points. Do NOT include markdown symbols like hashes (#) or asterisks (*) in your text output.";
+                    let systemInstruction = "You are an expert exam tutor. Provide clear structured exam answers with distinct headings on separate lines and detailed answer text underneath. Do NOT include markdown symbols like hashes (#), asterisks (*), or plus signs (+) anywhere in your text.";
                     let fullPrompt = `${systemInstruction} Question: "${text}".`;
 
                     const apiResponse = await fetch(apiEndpoint, {
@@ -422,12 +422,12 @@
                     }
                 } else {
                     await new Promise(r => setTimeout(r, 400));
-                    responseText = `Question: ${text}\n\nIntroduction:\nObject-Oriented Programming is a paradigm based on objects and classes.\n\nMain Concepts:\n1. Class - Blueprint of an object.\n2. Object - Instance of a class.\n3. Encapsulation - Wrapping data together.`;
+                    responseText = `Definition\nAdvanced Object-Oriented Programming extends basic concepts to build modular and reusable software.\n\nMain Concepts\n1. Class\nA blueprint that defines the data and functions of an object.\n2. Object\nAn instance of a class that represents a real-world entity.`;
                 }
 
                 let cleanedContentHtml = cleanMarkdownFormatting(responseText);
 
-                let questionDisplayBox = `<div class="academic-q-box">Q: ${escapeHtml(text)}</div>`;
+                let questionDisplayBox = `<div class="academic-q-box">Question: ${escapeHtml(text)}</div>`;
                 let finalAnswerBlock = `${questionDisplayBox}${cleanedContentHtml}`;
 
                 let chipsHtml = `
@@ -445,7 +445,7 @@
                 document.getElementById('artifactContent').innerHTML = finalAnswerBlock;
 
                 const aiHtml = `
-                    <div class="meta-info">✓ Structured Exam Format</div>
+                    <div class="meta-info">✓ Structured Heading & Answer Format</div>
                     <div class="answer-content">${finalAnswerBlock}</div>
                     ${sourcesHtml}`;
                 
