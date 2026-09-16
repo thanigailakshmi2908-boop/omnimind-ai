@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OmniMind Ultimate - Multi-Feature AI Suite</title>
+    <title>OmniMind Ultimate - Clean Academic Suite</title>
     <style>
         :root {
             --bg-deep: #070a14;
@@ -78,7 +78,6 @@
             gap: 20px; max-width: 900px; width: 100%; margin: 0 auto; scroll-behavior: smooth;
         }
 
-        /* Artifact Side Panel (Claude-style) */
         .artifact-panel {
             width: 420px; background: var(--panel-bg); border-left: 1px solid var(--border);
             display: none; flex-direction: column; padding: 15px; overflow-y: auto;
@@ -94,18 +93,19 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 
         .message { padding: 16px 20px; border-radius: 12px; line-height: 1.65; font-size: 0.95rem; word-break: break-word; position: relative; }
-        .user-message { background-color: var(--user-msg-bg); color: white; border-top-right-radius: 2px; display: flex; justify-content: space-between; align-items: flex-start; gap: 15px;}
+        .user-message { background-color: var(--user-msg-bg); color: white; border-top-right-radius: 2px; }
         .ai-message { background-color: var(--panel-bg); border: 1px solid var(--border); border-top-left-radius: 2px; color: var(--text-main); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
 
         .meta-info { font-size: 0.75rem; color: var(--success); margin-bottom: 8px; font-weight: 600; display: flex; align-items: center; gap: 6px; }
         .meta-info.loading { color: var(--warning); }
         
         .answer-content { margin-top: 4px; font-size: 0.98rem; flex: 1; }
-        .answer-content b, .answer-content strong { color: var(--accent); font-weight: 700; display: inline-block; margin-top: 6px; }
-
-        .edit-msg-btn { background: rgba(255,255,255,0.2); border: none; color: white; padding: 3px 8px; border-radius: 4px; font-size: 0.7rem; cursor: pointer; font-weight: 600; flex-shrink: 0; }
         
-        /* Perplexity-style Citations & Chips */
+        /* Structured Question & Answer Layout Styling */
+        .academic-q-box { font-size: 1.05rem; font-weight: 700; color: var(--accent); margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+        .academic-section-title { font-size: 1rem; font-weight: 700; color: var(--text-main); margin-top: 14px; margin-bottom: 6px; }
+        .academic-point { margin-bottom: 8px; padding-left: 12px; border-left: 2px solid var(--accent); }
+
         .citation-badge { background: rgba(99, 102, 241, 0.15); color: #818cf8; padding: 1px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: 700; text-decoration: none; border: 1px solid rgba(99, 102, 241, 0.3); vertical-align: super; }
         .sources-box { margin-top: 14px; font-size: 0.8rem; background: rgba(0,0,0,0.2); padding: 8px 12px; border-radius: 6px; border-left: 3px solid var(--accent); color: var(--text-muted); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
         .light-theme .sources-box { background: #f1f5f9; }
@@ -117,9 +117,6 @@
         .action-chip-btn { background: var(--accent); border: none; color: white; padding: 5px 10px; border-radius: 4px; font-size: 0.75rem; cursor: pointer; font-weight: 600; text-decoration: none; display: inline-block; }
         .action-chip-btn:hover { background: var(--accent-hover); }
         .stop-gen-btn { background: var(--danger); border: none; color: white; padding: 5px 10px; border-radius: 4px; font-size: 0.75rem; cursor: pointer; font-weight: 600; display: none; }
-
-        .generated-media-box { background: var(--bg-deep); border: 1px solid var(--border); padding: 12px; border-radius: 8px; margin-top: 10px; text-align: center; }
-        .generated-media-box img { max-width: 100%; border-radius: 6px; max-height: 220px; }
 
         .input-section { background-color: var(--panel-bg); padding: 15px 20px; border-top: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; gap: 8px; }
         .attachment-preview-bar { max-width: 900px; width: 100%; display: none; gap: 10px; align-items: center; font-size: 0.8rem; color: var(--text-muted); background: var(--bg-deep); padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border); }
@@ -136,12 +133,12 @@
 <body>
 
     <header>
-        <div class="logo">⚡ OmniMind <span>Ultimate Suite</span></div>
+        <div class="logo">⚡ OmniMind <span>Academic Suite</span></div>
         <div class="header-controls">
             <select id="personaSelect">
-                <option value="general">Persona: General Assistant</option>
                 <option value="tutor">Persona: Exam & Study Tutor</option>
                 <option value="coder">Persona: Code Architect</option>
+                <option value="general">Persona: General Assistant</option>
             </select>
             <select id="modelSelect">
                 <option value="gemini-3.5-flash-lite">Gemini 3.5 Lite (Fast)</option>
@@ -169,8 +166,8 @@
         <div class="chat-container" id="chatContainer">
             <div class="ai-wrapper">
                 <div class="message ai-message">
-                    <div class="meta-info">✓ Ultimate Suite Active</div>
-                    <div class="answer-content">OmniMind is upgraded with Perplexity citations, Claude-style artifacts, dynamic current facts (C. Joseph Vijay as CM), and quick follow-up chips. Ask anything!</div>
+                    <div class="meta-info">✓ Academic Suite Active</div>
+                    <div class="answer-content">Ready for exam questions. Answers will be cleanly separated into Question, Headings, and Bullet points without markdown symbols.</div>
                 </div>
             </div>
         </div>
@@ -181,7 +178,7 @@
                 <button id="closeArtifactBtn" style="background:transparent; border:none; color:var(--text-muted); cursor:pointer; font-weight:bold;">✕</button>
             </div>
             <div id="artifactContent" style="font-size:0.88rem; color:var(--text-muted); line-height:1.5;">
-                Generated study notes, summaries, or structured code blocks will render here automatically.
+                Clean exam question answers will render here automatically.
             </div>
         </div>
     </div>
@@ -195,7 +192,7 @@
             <input type="file" id="fileInput" style="display:none" accept="image/*,.txt">
             <button class="action-btn" id="attachBtn" title="Attach">📎</button>
             <button class="action-btn" id="micBtn" title="Voice">🎙️</button>
-            <input type="text" id="userInput" placeholder="Ask questions synced with real-time Google data...">
+            <input type="text" id="userInput" placeholder="Enter exam question (e.g., What is OOPs? Explain concepts)...">
             <button class="send-btn" id="sendBtn">Send</button>
         </div>
     </div>
@@ -264,7 +261,7 @@
 
         function clearHistory() {
             if (confirm("Clear chat workspace?")) {
-                localStorage.removeItem('omni_history_v108');
+                localStorage.removeItem('omni_history_v109');
                 document.getElementById('chatContainer').innerHTML = `<div class="ai-wrapper"><div class="message ai-message"><div class="meta-info">✓ Reset</div><div class="answer-content">Workspace cleared.</div></div></div>`;
             }
         }
@@ -317,13 +314,13 @@
         }
 
         function saveMessageToStorage(sender, htmlContent) {
-            let history = JSON.parse(localStorage.getItem('omni_history_v108') || '[]');
+            let history = JSON.parse(localStorage.getItem('omni_history_v109') || '[]');
             history.push({ sender, content: htmlContent });
-            localStorage.setItem('omni_history_v108', JSON.stringify(history));
+            localStorage.setItem('omni_history_v109', JSON.stringify(history));
         }
 
         function loadChatHistory() {
-            let history = JSON.parse(localStorage.getItem('omni_history_v108') || '[]');
+            let history = JSON.parse(localStorage.getItem('omni_history_v109') || '[]');
             const chatContainer = document.getElementById('chatContainer');
             history.forEach(item => {
                 const wrapper = document.createElement('div');
@@ -332,6 +329,32 @@
                 chatContainer.appendChild(wrapper);
             });
             chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        // Clean text parser to filter out raw markdown symbols (#, *, +)
+        function cleanMarkdownFormatting(rawText) {
+            let cleaned = rawText
+                .replace(/#{1,6}\s?/g, '') // remove markdown headers
+                .replace(/\*\*/g, '')      // remove bold markers
+                .replace(/\*/g, '')        // remove asterisks
+                .replace(/\+/g, '');       // remove plus signs
+            
+            let lines = cleaned.split('\n');
+            let formattedHtml = '';
+            
+            lines.forEach(line => {
+                let trimmed = line.trim();
+                if (!trimmed) return;
+                
+                // If it looks like a section heading or numbered breakdown
+                if (trimmed.endsWith(':') || /^\d+\./.test(trimmed)) {
+                    formattedHtml += `<div class="academic-section-title">${escapeHtml(trimmed)}</div>`;
+                } else {
+                    formattedHtml += `<div class="academic-point">${escapeHtml(trimmed)}</div>`;
+                }
+            });
+            
+            return formattedHtml;
         }
 
         async function processUserQuery() {
@@ -362,10 +385,10 @@
             aiWrapper.innerHTML = `
                 <div class="message ai-message">
                     <div class="meta-info loading" style="display:flex; justify-content:space-between; align-items:center;">
-                        <span>Checking real-time Google database references...</span>
+                        <span>Formatting academic exam answer...</span>
                         <button class="stop-gen-btn" id="stopGenBtn" style="display:inline-block;">Stop ⏹️</button>
                     </div>
-                    <div class="answer-content">Synthesizing verified current facts...</div>
+                    <div class="answer-content">Structuring question and breakdown sections...</div>
                 </div>`;
             chatContainer.appendChild(aiWrapper);
             chatContainer.scrollTop = chatContainer.scrollHeight;
@@ -375,18 +398,14 @@
             stopBtn.onclick = () => activeController.abort();
 
             let responseText = "";
-            let sourceText = `Engine: ${selectedModelName} | Google Live Synced`;
+            let sourceText = `Engine: ${selectedModelName} | Structured Academic Mode`;
 
             try {
                 if (userApiKey) {
                     const apiEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/${selectedModelCode}:generateContent?key=${userApiKey}`;
                     
-                    let personaPrompt = "Provide precise, helpful answers.";
-                    if (personaSelect.value === 'tutor') personaPrompt = "Act as an expert exam and study tutor, breaking information down into high-yield bullet points and structured notes.";
-                    if (personaSelect.value === 'coder') personaPrompt = "Act as a senior software architect providing clean code blocks and explanations.";
-
-                    let verifiedContext = `[Verified Google Data Reference for 2026: C. Joseph Vijay (TVK) is the incumbent Chief Minister of Tamil Nadu, having assumed office on May 10, 2026]`;
-                    let fullPrompt = `${verifiedContext} Persona Instruction: ${personaPrompt} User Query: "${text}". Provide accurate facts matching live Google records.`;
+                    let systemInstruction = "You are an expert exam tutor. Provide clear structured exam answers with distinct headings and bullet points. Do NOT include markdown symbols like hashes (#) or asterisks (*) in your text output.";
+                    let fullPrompt = `${systemInstruction} Question: "${text}".`;
 
                     const apiResponse = await fetch(apiEndpoint, {
                         method: 'POST',
@@ -403,35 +422,31 @@
                     }
                 } else {
                     await new Promise(r => setTimeout(r, 400));
-                    responseText = `Simulator Active: C. Joseph Vijay serves as the Chief Minister of Tamil Nadu. Add your Google API key for live generation.`;
+                    responseText = `Question: ${text}\n\nIntroduction:\nObject-Oriented Programming is a paradigm based on objects and classes.\n\nMain Concepts:\n1. Class - Blueprint of an object.\n2. Object - Instance of a class.\n3. Encapsulation - Wrapping data together.`;
                 }
 
-                // Perplexity citation formatting and Follow-up chips
-                let formattedText = escapeHtml(responseText).replace(/\n/g, '<br>');
-                formattedText += ` <a href="https://en.wikipedia.org/wiki/Chief_Minister_of_Tamil_Nadu" target="_blank" class="citation-badge">[1]</a>`;
+                let cleanedContentHtml = cleanMarkdownFormatting(responseText);
+
+                let questionDisplayBox = `<div class="academic-q-box">Q: ${escapeHtml(text)}</div>`;
+                let finalAnswerBlock = `${questionDisplayBox}${cleanedContentHtml}`;
 
                 let chipsHtml = `
                     <div class="followup-chips">
-                        <button class="chip-btn" onclick="document.getElementById('userInput').value='Summarize key details'; processUserQuery();">📝 Summarize Key Details</button>
-                        <button class="chip-btn" onclick="document.getElementById('userInput').value='Give quiz questions on this'; processUserQuery();">❓ Quiz Me</button>
-                        <button class="chip-btn" onclick="document.getElementById('userInput').value='Explain further'; processUserQuery();">💡 Deep Dive</button>
+                        <button class="chip-btn" onclick="document.getElementById('userInput').value='Explain with more examples'; processUserQuery();">💡 Add More Examples</button>
+                        <button class="chip-btn" onclick="document.getElementById('userInput').value='Give exam marks breakdown'; processUserQuery();">📊 Marks Breakdown</button>
                     </div>`;
 
-                let googleSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(text)}`;
                 let sourcesHtml = `
                     <div class="sources-box">
                         <span>${escapeHtml(sourceText)}</span>
-                        <a href="${googleSearchUrl}" target="_blank" class="action-chip-btn">🔍 Google Search Source ↗</a>
+                        <a href="https://www.google.com/search?q=${encodeURIComponent(text)}" target="_blank" class="action-chip-btn">🔍 Search Reference ↗</a>
                     </div>${chipsHtml}`;
 
-                // Update Artifact panel with structured data if needed
-                document.getElementById('artifactContent').innerHTML = `
-                    <b>Query:</b> ${escapeHtml(text)}<br><br>
-                    <b>Synthesized Output:</b><br>${escapeHtml(responseText).replace(/\n/g, '<br>')}`;
+                document.getElementById('artifactContent').innerHTML = finalAnswerBlock;
 
                 const aiHtml = `
-                    <div class="meta-info">✓ Verified Fact Check Active</div>
-                    <div class="answer-content">${formattedText}</div>
+                    <div class="meta-info">✓ Structured Exam Format</div>
+                    <div class="answer-content">${finalAnswerBlock}</div>
                     ${sourcesHtml}`;
                 
                 aiWrapper.querySelector('.message').innerHTML = aiHtml;
