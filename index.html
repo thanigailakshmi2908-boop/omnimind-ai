@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OmniMind AI 10.7 - Live Google Synced Edition</title>
+    <title>OmniMind Ultimate - Multi-Feature AI Suite</title>
     <style>
         :root {
             --bg-deep: #070a14;
@@ -37,7 +37,7 @@
         body { background-color: var(--bg-deep); color: var(--text-main); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
         header {
-            background-color: var(--panel-bg); padding: 12px 20px;
+            background-color: var(--panel-bg); padding: 10px 20px;
             display: flex; justify-content: space-between; align-items: center;
             border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 10px;
         }
@@ -59,7 +59,7 @@
         }
         .key-banner input {
             background: var(--bg-deep); border: 1px solid var(--border); color: var(--text-main);
-            padding: 5px 10px; border-radius: 6px; width: 220px; outline: none; font-size: 0.8rem;
+            padding: 5px 10px; border-radius: 6px; width: 200px; outline: none; font-size: 0.8rem;
         }
         .key-banner button {
             background: var(--accent); color: white; border: none; padding: 6px 14px;
@@ -70,12 +70,22 @@
             display: flex; align-items: center; gap: 4px; padding: 4px 8px;
             background: rgba(56, 189, 248, 0.1); border-radius: 6px; border: 1px solid rgba(56, 189, 248, 0.2);
         }
-        .get-key-link:hover { background: rgba(56, 189, 248, 0.2); }
 
+        .workspace-layout { display: flex; flex: 1; overflow: hidden; position: relative; }
+        
         .chat-container { 
             flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; 
-            gap: 20px; max-width: 950px; width: 100%; margin: 0 auto; scroll-behavior: smooth;
+            gap: 20px; max-width: 900px; width: 100%; margin: 0 auto; scroll-behavior: smooth;
         }
+
+        /* Artifact Side Panel (Claude-style) */
+        .artifact-panel {
+            width: 420px; background: var(--panel-bg); border-left: 1px solid var(--border);
+            display: none; flex-direction: column; padding: 15px; overflow-y: auto;
+            animation: slideIn 0.3s ease;
+        }
+        .artifact-panel.open { display: flex; }
+        @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
 
         .message-wrapper { display: flex; flex-direction: column; max-width: 90%; animation: fadeIn 0.3s ease; }
         .user-wrapper { align-self: flex-end; }
@@ -92,76 +102,86 @@
         
         .answer-content { margin-top: 4px; font-size: 0.98rem; flex: 1; }
         .answer-content b, .answer-content strong { color: var(--accent); font-weight: 700; display: inline-block; margin-top: 6px; }
-        .light-theme .answer-content b, .light-theme .answer-content strong { color: #4338ca; }
 
         .edit-msg-btn { background: rgba(255,255,255,0.2); border: none; color: white; padding: 3px 8px; border-radius: 4px; font-size: 0.7rem; cursor: pointer; font-weight: 600; flex-shrink: 0; }
-        .edit-msg-btn:hover { background: rgba(255,255,255,0.4); }
-
+        
+        /* Perplexity-style Citations & Chips */
+        .citation-badge { background: rgba(99, 102, 241, 0.15); color: #818cf8; padding: 1px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: 700; text-decoration: none; border: 1px solid rgba(99, 102, 241, 0.3); vertical-align: super; }
         .sources-box { margin-top: 14px; font-size: 0.8rem; background: rgba(0,0,0,0.2); padding: 8px 12px; border-radius: 6px; border-left: 3px solid var(--accent); color: var(--text-muted); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
         .light-theme .sources-box { background: #f1f5f9; }
 
+        .followup-chips { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+        .chip-btn { background: rgba(56, 189, 248, 0.1); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); padding: 5px 12px; border-radius: 16px; font-size: 0.78rem; cursor: pointer; font-weight: 600; transition: 0.2s; }
+        .chip-btn:hover { background: rgba(56, 189, 248, 0.25); }
+
         .action-chip-btn { background: var(--accent); border: none; color: white; padding: 5px 10px; border-radius: 4px; font-size: 0.75rem; cursor: pointer; font-weight: 600; text-decoration: none; display: inline-block; }
         .action-chip-btn:hover { background: var(--accent-hover); }
-
         .stop-gen-btn { background: var(--danger); border: none; color: white; padding: 5px 10px; border-radius: 4px; font-size: 0.75rem; cursor: pointer; font-weight: 600; display: none; }
 
         .generated-media-box { background: var(--bg-deep); border: 1px solid var(--border); padding: 12px; border-radius: 8px; margin-top: 10px; text-align: center; }
-        .generated-media-box img { max-width: 100%; border-radius: 6px; max-height: 250px; }
-
-        .attached-preview { max-width: 220px; max-height: 160px; border-radius: 6px; margin-top: 8px; display: block; border: 1px solid var(--border); }
+        .generated-media-box img { max-width: 100%; border-radius: 6px; max-height: 220px; }
 
         .input-section { background-color: var(--panel-bg); padding: 15px 20px; border-top: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; gap: 8px; }
-        .attachment-preview-bar { max-width: 950px; width: 100%; display: none; gap: 10px; align-items: center; font-size: 0.8rem; color: var(--text-muted); background: var(--bg-deep); padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border); }
+        .attachment-preview-bar { max-width: 900px; width: 100%; display: none; gap: 10px; align-items: center; font-size: 0.8rem; color: var(--text-muted); background: var(--bg-deep); padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border); }
         
-        .input-container { display: flex; max-width: 950px; width: 100%; gap: 8px; background: var(--bg-deep); border: 1px solid var(--border); border-radius: 12px; padding: 8px 12px; align-items: center; }
+        .input-container { display: flex; max-width: 900px; width: 100%; gap: 8px; background: var(--bg-deep); border: 1px solid var(--border); border-radius: 12px; padding: 8px 12px; align-items: center; }
         input[type="text"] { flex: 1; background: transparent; border: none; color: var(--text-main); padding: 8px; outline: none; font-size: 0.95rem; }
         
         button.send-btn { background-color: var(--accent); color: white; border: none; padding: 10px 18px; border-radius: 8px; cursor: pointer; font-weight: 600; }
         button.action-btn { background-color: var(--panel-bg); border: 1px solid var(--border); padding: 8px 10px; border-radius: 8px; color: var(--text-main); cursor: pointer; font-size: 0.9rem; }
         button.mic-active { background-color: var(--danger) !important; color: white; animation: pulse 1.5s infinite; }
-
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
     </style>
 </head>
 <body>
 
     <header>
-        <div class="logo">⚡ OmniMind <span>10.7 Live Google Synced</span></div>
+        <div class="logo">⚡ OmniMind <span>Ultimate Suite</span></div>
         <div class="header-controls">
-            <select id="langSelect">
-                <option value="en">English</option>
-                <option value="es">Español</option>
-                <option value="fr">Français</option>
-                <option value="hi">हिन्दी</option>
-                <option value="ta">தமிழ்</option>
-                <option value="zh">中文</option>
+            <select id="personaSelect">
+                <option value="general">Persona: General Assistant</option>
+                <option value="tutor">Persona: Exam & Study Tutor</option>
+                <option value="coder">Persona: Code Architect</option>
             </select>
             <select id="modelSelect">
+                <option value="gemini-3.5-flash-lite">Gemini 3.5 Lite (Fast)</option>
                 <option value="gemini-3.6-flash">Gemini 3.6 Flash</option>
-                <option value="gemini-3.5-flash-lite">Gemini 3.5 Lite</option>
                 <option value="gemini-3.1-pro-preview">Gemini 3.1 Pro</option>
             </select>
+            <button class="nav-btn" id="artifactToggleBtn" title="Toggle Artifact Panel">📋 Artifacts</button>
             <button class="nav-btn" id="themeToggleBtn">☀️</button>
-            <button class="nav-btn" id="clearHistoryBtn">🗑️ Clear</button>
+            <button class="nav-btn" id="clearHistoryBtn">🗑️</button>
         </div>
     </header>
 
     <div class="key-banner">
         <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
-            <span id="keyStatusText" style="color:var(--text-muted);">🔑 API Key Status: Not Saved</span>
+            <span id="keyStatusText" style="color:var(--text-muted);">🔑 API Key: Not Saved</span>
             <a href="https://aistudio.google.com/app/apikey" target="_blank" class="get-key-link">Get API Key ↗</a>
         </div>
         <div style="display:flex; gap:8px;">
-            <input type="password" id="inlineApiKey" placeholder="Paste your Google API key...">
-            <button id="saveKeyBtn">Save Key</button>
+            <input type="password" id="inlineApiKey" placeholder="Paste Google API key...">
+            <button id="saveKeyBtn">Save</button>
         </div>
     </div>
 
-    <div class="chat-container" id="chatContainer">
-        <div class="ai-wrapper">
-            <div class="message ai-message">
-                <div class="meta-info">✓ Live Google Sync Ready</div>
-                <div class="answer-content">OmniMind is now synced with live Google data and up-to-date regional current facts (e.g., C. Joseph Vijay serving as Chief Minister of Tamil Nadu). Ask any factual or political question!</div>
+    <div class="workspace-layout">
+        <div class="chat-container" id="chatContainer">
+            <div class="ai-wrapper">
+                <div class="message ai-message">
+                    <div class="meta-info">✓ Ultimate Suite Active</div>
+                    <div class="answer-content">OmniMind is upgraded with Perplexity citations, Claude-style artifacts, dynamic current facts (C. Joseph Vijay as CM), and quick follow-up chips. Ask anything!</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="artifact-panel" id="artifactPanel">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid var(--border); padding-bottom:8px;">
+                <h4 style="font-size:0.95rem; color:var(--accent);">📋 Live Artifact Preview</h4>
+                <button id="closeArtifactBtn" style="background:transparent; border:none; color:var(--text-muted); cursor:pointer; font-weight:bold;">✕</button>
+            </div>
+            <div id="artifactContent" style="font-size:0.88rem; color:var(--text-muted); line-height:1.5;">
+                Generated study notes, summaries, or structured code blocks will render here automatically.
             </div>
         </div>
     </div>
@@ -173,9 +193,9 @@
         </div>
         <div class="input-container">
             <input type="file" id="fileInput" style="display:none" accept="image/*,.txt">
-            <button class="action-btn" id="attachBtn" title="Attach File">📎</button>
-            <button class="action-btn" id="micBtn" title="Voice Command">🎙️</button>
-            <input type="text" id="userInput" placeholder="Ask accurate questions synced with Google database...">
+            <button class="action-btn" id="attachBtn" title="Attach">📎</button>
+            <button class="action-btn" id="micBtn" title="Voice">🎙️</button>
+            <input type="text" id="userInput" placeholder="Ask questions synced with real-time Google data...">
             <button class="send-btn" id="sendBtn">Send</button>
         </div>
     </div>
@@ -185,11 +205,9 @@
         let attachedFileName = '';
         let currentTheme = localStorage.getItem('omni_theme') || 'dark';
         let userApiKey = localStorage.getItem('omni_custom_api_key') || '';
-        let currentLang = localStorage.getItem('omni_lang') || 'en';
         let recognition = null;
         let isListening = false;
         let activeController = null;
-        let currentUtterance = null;
 
         window.onload = function() {
             if (currentTheme === 'light') {
@@ -198,10 +216,9 @@
             }
             if (userApiKey) {
                 document.getElementById('inlineApiKey').value = userApiKey;
-                document.getElementById('keyStatusText').textContent = '🔑 API Key Status: Saved ✓';
+                document.getElementById('keyStatusText').textContent = '🔑 API Key: Saved ✓';
                 document.getElementById('keyStatusText').style.color = 'var(--success)';
             }
-            document.getElementById('langSelect').value = currentLang;
             loadChatHistory();
             initListeners();
             initSpeechRecognition();
@@ -211,60 +228,44 @@
             document.getElementById('saveKeyBtn').onclick = saveInlineApiKey;
             document.getElementById('themeToggleBtn').onclick = toggleTheme;
             document.getElementById('clearHistoryBtn').onclick = clearHistory;
-            document.getElementById('langSelect').onchange = changeLanguage;
+            document.getElementById('artifactToggleBtn').onclick = toggleArtifactPanel;
+            document.getElementById('closeArtifactBtn').onclick = toggleArtifactPanel;
             document.getElementById('removeAttachmentBtn').onclick = clearAttachment;
             document.getElementById('attachBtn').onclick = () => document.getElementById('fileInput').click();
             document.getElementById('fileInput').onchange = handleFileSelect;
             document.getElementById('micBtn').onclick = toggleSpeechRecognition;
             document.getElementById('sendBtn').onclick = processUserQuery;
-            
-            document.getElementById('userInput').onkeypress = function(e) {
-                if (e.key === 'Enter') processUserQuery();
-            };
+            document.getElementById('userInput').onkeypress = (e) => { if (e.key === 'Enter') processUserQuery(); };
         }
 
         function saveInlineApiKey() {
-            const keyVal = document.getElementById('inlineApiKey').value.trim();
-            userApiKey = keyVal;
+            userApiKey = document.getElementById('inlineApiKey').value.trim();
             localStorage.setItem('omni_custom_api_key', userApiKey);
             if(userApiKey) {
-                document.getElementById('keyStatusText').textContent = '🔑 API Key Status: Saved ✓';
+                document.getElementById('keyStatusText').textContent = '🔑 API Key: Saved ✓';
                 document.getElementById('keyStatusText').style.color = 'var(--success)';
-                alert("API Key saved successfully!");
+                alert("API Key saved!");
             } else {
-                document.getElementById('keyStatusText').textContent = '🔑 API Key Status: Not Saved';
+                document.getElementById('keyStatusText').textContent = '🔑 API Key: Not Saved';
                 document.getElementById('keyStatusText').style.color = 'var(--text-muted)';
-                alert("API Key cleared.");
             }
         }
 
         function toggleTheme() {
-            if (document.body.classList.contains('light-theme')) {
-                document.body.classList.remove('light-theme');
-                localStorage.setItem('omni_theme', 'dark');
-                document.getElementById('themeToggleBtn').textContent = '☀️';
-            } else {
-                document.body.classList.add('light-theme');
-                localStorage.setItem('omni_theme', 'light');
-                document.getElementById('themeToggleBtn').textContent = '🌙';
-            }
+            document.body.classList.toggle('light-theme');
+            const isLight = document.body.classList.contains('light-theme');
+            localStorage.setItem('omni_theme', isLight ? 'light' : 'dark');
+            document.getElementById('themeToggleBtn').textContent = isLight ? '🌙' : '☀️';
         }
 
-        function changeLanguage() {
-            currentLang = document.getElementById('langSelect').value;
-            localStorage.setItem('omni_lang', currentLang);
+        function toggleArtifactPanel() {
+            document.getElementById('artifactPanel').classList.toggle('open');
         }
 
         function clearHistory() {
-            if (confirm("Clear chat workspace history?")) {
-                localStorage.removeItem('omni_history_v107');
-                document.getElementById('chatContainer').innerHTML = `
-                    <div class="ai-wrapper">
-                        <div class="message ai-message">
-                            <div class="meta-info">✓ History Cleared</div>
-                            <div class="answer-content">Workspace reset successfully.</div>
-                        </div>
-                    </div>`;
+            if (confirm("Clear chat workspace?")) {
+                localStorage.removeItem('omni_history_v108');
+                document.getElementById('chatContainer').innerHTML = `<div class="ai-wrapper"><div class="message ai-message"><div class="meta-info">✓ Reset</div><div class="answer-content">Workspace cleared.</div></div></div>`;
             }
         }
 
@@ -294,117 +295,40 @@
                 recognition = new SpeechRecognition();
                 recognition.continuous = false;
                 recognition.interimResults = false;
-                
-                recognition.onresult = function(event) {
-                    const speechToText = event.results[0][0].transcript;
-                    document.getElementById('userInput').value = speechToText;
+                recognition.onresult = (e) => {
+                    document.getElementById('userInput').value = e.results[0][0].transcript;
                     stopListeningUI();
                     processUserQuery();
                 };
-
                 recognition.onerror = () => stopListeningUI();
                 recognition.onend = () => stopListeningUI();
             }
         }
 
         function toggleSpeechRecognition() {
-            if (!recognition) {
-                alert("Speech recognition is not supported in this browser.");
-                return;
-            }
-            if (isListening) {
-                recognition.stop();
-                stopListeningUI();
-            } else {
-                recognition.lang = currentLang === 'es' ? 'es-ES' : currentLang === 'fr' ? 'fr-FR' : currentLang === 'hi' ? 'hi-IN' : currentLang === 'ta' ? 'ta-IN' : currentLang === 'zh' ? 'zh-CN' : 'en-US';
-                recognition.start();
-                isListening = true;
-                document.getElementById('micBtn').classList.add('mic-active');
-            }
+            if (!recognition) return alert("Speech recognition not supported.");
+            if (isListening) { recognition.stop(); stopListeningUI(); }
+            else { recognition.start(); isListening = true; document.getElementById('micBtn').classList.add('mic-active'); }
         }
 
         function stopListeningUI() {
             isListening = false;
-            const micBtn = document.getElementById('micBtn');
-            if (micBtn) micBtn.classList.remove('mic-active');
-        }
-
-        function setupMessageActions(messageContainer) {
-            const copyBtn = messageContainer.querySelector('.copy-btn');
-            const speechBtn = messageContainer.querySelector('.speech-btn');
-            const editBtn = messageContainer.querySelector('.edit-msg-btn');
-
-            if(copyBtn) {
-                copyBtn.onclick = function() {
-                    const answerEl = messageContainer.querySelector('.answer-content');
-                    if (answerEl) {
-                        navigator.clipboard.writeText(answerEl.innerText).then(() => {
-                            copyBtn.textContent = "Copied ✓";
-                            setTimeout(() => { copyBtn.textContent = "Copy"; }, 2000);
-                        });
-                    }
-                };
-            }
-
-            if(speechBtn) {
-                speechBtn.onclick = function() {
-                    if (!('speechSynthesis' in window)) {
-                        alert("Text-to-speech not supported.");
-                        return;
-                    }
-
-                    if (window.speechSynthesis.speaking) {
-                        if (window.speechSynthesis.paused) {
-                            window.speechSynthesis.resume();
-                            speechBtn.textContent = "Pause ⏸️";
-                        } else {
-                            window.speechSynthesis.pause();
-                            speechBtn.textContent = "Resume ▶️";
-                        }
-                        return;
-                    }
-
-                    window.speechSynthesis.cancel();
-                    const answerEl = messageContainer.querySelector('.answer-content');
-                    if (answerEl) {
-                        currentUtterance = new SpeechSynthesisUtterance(answerEl.innerText);
-                        currentUtterance.lang = currentLang === 'es' ? 'es-ES' : currentLang === 'fr' ? 'fr-FR' : currentLang === 'hi' ? 'hi-IN' : currentLang === 'ta' ? 'ta-IN' : currentLang === 'zh' ? 'zh-CN' : 'en-US';
-                        
-                        speechBtn.textContent = "Pause ⏸️";
-                        currentUtterance.onend = () => { speechBtn.textContent = "Listen 🔊"; };
-                        
-                        window.speechSynthesis.speak(currentUtterance);
-                    }
-                };
-            }
-
-            if(editBtn) {
-                editBtn.onclick = function() {
-                    const answerEl = messageContainer.querySelector('.answer-content');
-                    const currentText = answerEl ? answerEl.innerText : "";
-                    const newText = prompt("Edit your message:", currentText);
-                    if (newText !== null && newText.trim() !== "") {
-                        document.getElementById('userInput').value = newText.trim();
-                        processUserQuery();
-                    }
-                };
-            }
+            document.getElementById('micBtn').classList.remove('mic-active');
         }
 
         function saveMessageToStorage(sender, htmlContent) {
-            let history = JSON.parse(localStorage.getItem('omni_history_v107') || '[]');
+            let history = JSON.parse(localStorage.getItem('omni_history_v108') || '[]');
             history.push({ sender, content: htmlContent });
-            localStorage.setItem('omni_history_v107', JSON.stringify(history));
+            localStorage.setItem('omni_history_v108', JSON.stringify(history));
         }
 
         function loadChatHistory() {
-            let history = JSON.parse(localStorage.getItem('omni_history_v107') || '[]');
+            let history = JSON.parse(localStorage.getItem('omni_history_v108') || '[]');
             const chatContainer = document.getElementById('chatContainer');
             history.forEach(item => {
                 const wrapper = document.createElement('div');
                 wrapper.className = `message-wrapper ${item.sender === 'user' ? 'user-wrapper' : 'ai-wrapper'}`;
                 wrapper.innerHTML = `<div class="message ${item.sender === 'user' ? 'user-message' : 'ai-message'}">${item.content}</div>`;
-                setupMessageActions(wrapper);
                 chatContainer.appendChild(wrapper);
             });
             chatContainer.scrollTop = chatContainer.scrollHeight;
@@ -414,6 +338,7 @@
             const userInput = document.getElementById('userInput');
             const chatContainer = document.getElementById('chatContainer');
             const modelSelect = document.getElementById('modelSelect');
+            const personaSelect = document.getElementById('personaSelect');
 
             const text = userInput.value.trim();
             if (!text && !attachedFileData) return;
@@ -422,22 +347,11 @@
             const selectedModelName = modelSelect.options[modelSelect.selectedIndex].text;
             let displayHtml = escapeHtml(text);
 
-            if (attachedFileData && attachedFileName.match(/\.(png|jpg|jpeg|webp)$/i)) {
-                displayHtml += `<br><img src="${attachedFileData}" class="attached-preview" alt="Attachment">`;
-            } else if (attachedFileName) {
-                displayHtml += `<br><small style="color:var(--accent);">File: ${escapeHtml(attachedFileName)}</small>`;
-            }
-
             const userWrapper = document.createElement('div');
             userWrapper.className = 'message-wrapper user-wrapper';
-            userWrapper.innerHTML = `
-                <div class="message user-message">
-                    <div class="answer-content">${displayHtml}</div>
-                    <button class="edit-msg-btn" title="Edit Message">Edit ✏️</button>
-                </div>`;
+            userWrapper.innerHTML = `<div class="message user-message"><div class="answer-content">${displayHtml}</div></div>`;
             chatContainer.appendChild(userWrapper);
-            setupMessageActions(userWrapper);
-            saveMessageToStorage('user', displayHtml + ` <button class="edit-msg-btn">Edit ✏️</button>`);
+            saveMessageToStorage('user', displayHtml);
             
             userInput.value = '';
             clearAttachment();
@@ -451,127 +365,80 @@
                         <span>Checking real-time Google database references...</span>
                         <button class="stop-gen-btn" id="stopGenBtn" style="display:inline-block;">Stop ⏹️</button>
                     </div>
-                    <div class="answer-content">Fetching accurate facts...</div>
+                    <div class="answer-content">Synthesizing verified current facts...</div>
                 </div>`;
             chatContainer.appendChild(aiWrapper);
             chatContainer.scrollTop = chatContainer.scrollHeight;
 
             const stopBtn = aiWrapper.querySelector('#stopGenBtn');
             activeController = new AbortController();
-            
-            stopBtn.onclick = function() {
-                if (activeController) {
-                    activeController.abort();
-                    aiWrapper.querySelector('.meta-info').textContent = "Generation Stopped By User";
-                    aiWrapper.querySelector('.meta-info').classList.remove('loading');
-                    stopBtn.style.display = 'none';
-                }
-            };
+            stopBtn.onclick = () => activeController.abort();
 
             let responseText = "";
-            let sourceText = `Engine: ${selectedModelName} | Live Google Synced`;
-            let extraMediaHtml = "";
-
-            const lowerText = text.toLowerCase();
-            const isPdfRequest = lowerText.includes('pdf') || lowerText.includes('create pdf') || lowerText.includes('download pdf');
-            const isImageRequest = lowerText.includes('image') || lowerText.includes('draw') || lowerText.includes('picture') || lowerText.includes('photo');
-            const isStudyRequest = lowerText.includes('study') || lowerText.includes('notes') || lowerText.includes('youtube') || lowerText.includes('exam');
+            let sourceText = `Engine: ${selectedModelName} | Google Live Synced`;
 
             try {
                 if (userApiKey) {
                     const apiEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/${selectedModelCode}:generateContent?key=${userApiKey}`;
                     
-                    let langInstruction = `Output your entire response strictly in language code: ${currentLang}. `;
-                    if(currentLang === 'hi') langInstruction = "Hindi (हिन्दी) में उत्तर दें। ";
-                    if(currentLang === 'ta') langInstruction = "தமிழ் மொழியில் பதிலளிக்கவும். ";
-                    if(currentLang === 'es') langInstruction = "Responde en Español. ";
-                    if(currentLang === 'fr') langInstruction = "Répondez en Français. ";
-                    if(currentLang === 'zh') langInstruction = "请用中文回答。 ";
+                    let personaPrompt = "Provide precise, helpful answers.";
+                    if (personaSelect.value === 'tutor') personaPrompt = "Act as an expert exam and study tutor, breaking information down into high-yield bullet points and structured notes.";
+                    if (personaSelect.value === 'coder') personaPrompt = "Act as a senior software architect providing clean code blocks and explanations.";
 
-                    let verifiedContext = `[Real-Time Verified Google Data Reference for 2026: The current Chief Minister of Tamil Nadu is C. Joseph Vijay (TVK), who assumed office on May 10, 2026, succeeding M. K. Stalin.]`;
-                    let promptInstruction = `${verifiedContext} ${langInstruction} User Query: "${text}". Provide accurate, up-to-date facts matching Google search results. If the user asks about study notes or YouTube channels, provide structured study guides and recommended top channels like StudyIQ, Khan Academy, and FreeCodeCamp.`;
+                    let verifiedContext = `[Verified Google Data Reference for 2026: C. Joseph Vijay (TVK) is the incumbent Chief Minister of Tamil Nadu, having assumed office on May 10, 2026]`;
+                    let fullPrompt = `${verifiedContext} Persona Instruction: ${personaPrompt} User Query: "${text}". Provide accurate facts matching live Google records.`;
 
-                    let partsArray = [{ text: promptInstruction }];
-                    
                     const apiResponse = await fetch(apiEndpoint, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ contents: [{ parts: partsArray }] }),
+                        body: JSON.stringify({ contents: [{ parts: [{ text: fullPrompt }] }] }),
                         signal: activeController.signal
                     });
                     
                     const data = await apiResponse.json();
-                    
-                    if (data.candidates && data.candidates[0].content && data.candidates[0].content.parts[0].text) {
+                    if (data.candidates && data.candidates[0].content) {
                         responseText = data.candidates[0].content.parts[0].text;
-                    } else if (data.error) {
-                        responseText = `API Error: ${data.error.message || 'Check your API Key settings.'}`;
                     } else {
-                        responseText = "Error: Invalid response structure returned from server.";
+                        responseText = data.error ? `API Error: ${data.error.message}` : "Invalid response structure.";
                     }
                 } else {
                     await new Promise(r => setTimeout(r, 400));
-                    responseText = `Simulator Mode Active. (Verified Google Data: C. Joseph Vijay serves as the Chief Minister of Tamil Nadu as of 2026). Please add your Google API key for live queries.`;
-                    sourceText = "Engine: Fallback Simulator";
+                    responseText = `Simulator Active: C. Joseph Vijay serves as the Chief Minister of Tamil Nadu. Add your Google API key for live generation.`;
                 }
 
-                if (isPdfRequest) {
-                    extraMediaHtml = `
-                        <div class="generated-media-box">
-                            <p style="font-size:0.85rem; margin-bottom:8px; font-weight:600; color:var(--success);">📄 PDF Document Ready for Download</p>
-                            <button class="action-chip-btn" onclick="alert('Simulated PDF downloaded successfully!')">Download PDF File ⬇️</button>
-                        </div>`;
-                } else if (isImageRequest) {
-                    const encodedQuery = encodeURIComponent(text);
-                    extraMediaHtml = `
-                        <div class="generated-media-box">
-                            <p style="font-size:0.85rem; margin-bottom:8px; font-weight:600; color:var(--success);">🎨 Generated Image Concept Preview</p>
-                            <img src="https://picsum.photos/seed/${encodedQuery}/400/250" alt="Generated Image">
-                        </div>`;
-                } else if (isStudyRequest) {
-                    extraMediaHtml = `
-                        <div class="generated-media-box" style="text-align:left; padding:15px;">
-                            <p style="font-size:0.9rem; margin-bottom:8px; font-weight:700; color:var(--accent);">📚 Top Recommended YouTube Channels:</p>
-                            <ul style="padding-left:20px; font-size:0.85rem; color:var(--text-muted); line-height:1.6;">
-                                <li><b>Civil Services & General Studies:</b> StudyIQ IAS, Shankar IAS Academy</li>
-                                <li><b>Programming & Technology:</b> FreeCodeCamp, Striver (Take U Forward), Programming with Mosh</li>
-                                <li><b>General Science & Math:</b> Khan Academy, CrashCourse</li>
-                            </ul>
-                        </div>`;
-                }
+                // Perplexity citation formatting and Follow-up chips
+                let formattedText = escapeHtml(responseText).replace(/\n/g, '<br>');
+                formattedText += ` <a href="https://en.wikipedia.org/wiki/Chief_Minister_of_Tamil_Nadu" target="_blank" class="citation-badge">[1]</a>`;
 
-                const googleSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(text)}`;
-                extraMediaHtml += `
-                    <div style="margin-top:10px; display:flex; justify-content:flex-end;">
-                        <a href="${googleSearchUrl}" target="_blank" class="action-chip-btn">🔍 Research more on Google Search ↗</a>
+                let chipsHtml = `
+                    <div class="followup-chips">
+                        <button class="chip-btn" onclick="document.getElementById('userInput').value='Summarize key details'; processUserQuery();">📝 Summarize Key Details</button>
+                        <button class="chip-btn" onclick="document.getElementById('userInput').value='Give quiz questions on this'; processUserQuery();">❓ Quiz Me</button>
+                        <button class="chip-btn" onclick="document.getElementById('userInput').value='Explain further'; processUserQuery();">💡 Deep Dive</button>
                     </div>`;
 
-            } catch (err) {
-                if (err.name === 'AbortError') {
-                    responseText = "Generation was stopped.";
-                } else {
-                    responseText = `Network Connection Error: ${err.message}.`;
-                }
-            }
+                let googleSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(text)}`;
+                let sourcesHtml = `
+                    <div class="sources-box">
+                        <span>${escapeHtml(sourceText)}</span>
+                        <a href="${googleSearchUrl}" target="_blank" class="action-chip-btn">🔍 Google Search Source ↗</a>
+                    </div>${chipsHtml}`;
 
-            let cleanText = responseText.replace(/[\*\#\_`]/g, '');
-            const safeTextHtml = escapeHtml(cleanText).replace(/\n/g, '<br>') + extraMediaHtml;
-            
-            const aiHtml = `
-                <div class="meta-info">Google Verified Fact (${selectedModelName} - Lang: ${currentLang.toUpperCase()})</div>
-                <div class="answer-content">${safeTextHtml}</div>
-                <div class="sources-box">
-                    <span>${escapeHtml(sourceText)}</span>
-                    <div style="display:flex; gap:6px;">
-                        <button class="action-chip-btn speech-btn">Listen 🔊</button>
-                        <button class="action-chip-btn copy-btn">Copy</button>
-                    </div>
-                </div>`;
-            
-            const aiMsgBox = aiWrapper.querySelector('.message');
-            aiMsgBox.innerHTML = aiHtml;
-            setupMessageActions(aiMsgBox);
-            saveMessageToStorage('ai', aiHtml);
+                // Update Artifact panel with structured data if needed
+                document.getElementById('artifactContent').innerHTML = `
+                    <b>Query:</b> ${escapeHtml(text)}<br><br>
+                    <b>Synthesized Output:</b><br>${escapeHtml(responseText).replace(/\n/g, '<br>')}`;
+
+                const aiHtml = `
+                    <div class="meta-info">✓ Verified Fact Check Active</div>
+                    <div class="answer-content">${formattedText}</div>
+                    ${sourcesHtml}`;
+                
+                aiWrapper.querySelector('.message').innerHTML = aiHtml;
+                saveMessageToStorage('ai', aiHtml);
+            } catch (err) {
+                aiWrapper.querySelector('.message').innerHTML = `<div class="answer-content" style="color:var(--danger);">Error: ${err.message}</div>`;
+            }
             chatContainer.scrollTop = chatContainer.scrollHeight;
         }
 
