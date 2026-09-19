@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OmniMind Ultimate - Academic Suite</title>
+    <title>OmniMind Ultimate v100x - Next-Gen Academic & Research Suite</title>
+    <!-- Marked.js for robust Markdown rendering -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         :root {
             --bg-deep: #070a14;
@@ -39,7 +41,7 @@
         header {
             background-color: var(--panel-bg); padding: 10px 20px;
             display: flex; justify-content: space-between; align-items: center;
-            border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 10px;
+            border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 10px; z-index: 10;
         }
         .logo { font-size: 1.15rem; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 8px; }
         .logo span { color: var(--accent); }
@@ -47,9 +49,10 @@
         .header-controls { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
         select, .nav-btn { 
             background: var(--bg-deep); color: var(--text-main); border: 1px solid var(--border); 
-            padding: 6px 12px; border-radius: 8px; outline: none; font-size: 0.85rem; cursor: pointer;
+            padding: 6px 12px; border-radius: 8px; outline: none; font-size: 0.85rem; cursor: pointer; transition: all 0.2s;
         }
         .nav-btn { background: #1e293b; color: #38bdf8; font-weight: 600; }
+        .nav-btn:hover { opacity: 0.9; }
         .light-theme .nav-btn { background: #e0f2fe; color: #0284c7; border-color: #bae6fd; }
 
         .key-banner {
@@ -101,22 +104,27 @@
         
         .answer-content { margin-top: 4px; font-size: 0.98rem; flex: 1; }
         
-        /* Strict Separated Layout matching reference style */
         .academic-q-box { font-size: 1.1rem; font-weight: 700; color: #38bdf8; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
         .academic-heading-block { font-size: 1.02rem; font-weight: 700; color: var(--accent); margin-top: 18px; margin-bottom: 6px; letter-spacing: 0.3px; }
         .academic-answer-block { font-size: 0.96rem; color: var(--text-main); margin-bottom: 12px; padding-left: 12px; border-left: 3px solid var(--accent); line-height: 1.7; background: rgba(255, 255, 255, 0.01); }
 
-        .citation-badge { background: rgba(99, 102, 241, 0.15); color: #818cf8; padding: 1px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: 700; text-decoration: none; border: 1px solid rgba(99, 102, 241, 0.3); vertical-align: super; }
-        .sources-box { margin-top: 14px; font-size: 0.8rem; background: rgba(0,0,0,0.2); padding: 8px 12px; border-radius: 6px; border-left: 3px solid var(--accent); color: var(--text-muted); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+        .citation-badge { background: rgba(99, 102, 241, 0.15); color: #818cf8; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 700; text-decoration: none; border: 1px solid rgba(99, 102, 241, 0.3); vertical-align: super; margin-left: 4px; }
+        .citation-badge:hover { background: rgba(99, 102, 241, 0.3); }
+
+        .sources-box { margin-top: 14px; font-size: 0.8rem; background: rgba(0,0,0,0.2); padding: 10px 14px; border-radius: 6px; border-left: 3px solid var(--accent); color: var(--text-muted); display: flex; flex-direction: column; gap: 8px; }
         .light-theme .sources-box { background: #f1f5f9; }
+        .grounding-links { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
 
         .followup-chips { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
         .chip-btn { background: rgba(56, 189, 248, 0.1); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); padding: 5px 12px; border-radius: 16px; font-size: 0.78rem; cursor: pointer; font-weight: 600; transition: 0.2s; }
         .chip-btn:hover { background: rgba(56, 189, 248, 0.25); }
 
-        .action-chip-btn { background: var(--accent); border: none; color: white; padding: 5px 10px; border-radius: 4px; font-size: 0.75rem; cursor: pointer; font-weight: 600; text-decoration: none; display: inline-block; }
+        .action-chip-btn { background: var(--accent); border: none; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; cursor: pointer; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; }
         .action-chip-btn:hover { background: var(--accent-hover); }
         .stop-gen-btn { background: var(--danger); border: none; color: white; padding: 5px 10px; border-radius: 4px; font-size: 0.75rem; cursor: pointer; font-weight: 600; display: none; }
+
+        .tts-btn { background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); padding: 4px 10px; border-radius: 6px; font-size: 0.78rem; cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; margin-top: 8px; }
+        .tts-btn:hover { background: rgba(16, 185, 129, 0.3); }
 
         .input-section { background-color: var(--panel-bg); padding: 15px 20px; border-top: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; gap: 8px; }
         .attachment-preview-bar { max-width: 900px; width: 100%; display: none; gap: 10px; align-items: center; font-size: 0.8rem; color: var(--text-muted); background: var(--bg-deep); padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border); }
@@ -127,23 +135,49 @@
         button.send-btn { background-color: var(--accent); color: white; border: none; padding: 10px 18px; border-radius: 8px; cursor: pointer; font-weight: 600; }
         button.action-btn { background-color: var(--panel-bg); border: 1px solid var(--border); padding: 8px 10px; border-radius: 8px; color: var(--text-main); cursor: pointer; font-size: 0.9rem; }
         button.mic-active { background-color: var(--danger) !important; color: white; animation: pulse 1.5s infinite; }
+        
+        .toggle-switch { display: flex; align-items: center; gap: 6px; font-size: 0.8rem; color: var(--text-muted); cursor: pointer; }
+        .toggle-switch input { display: none; }
+        .toggle-slider { width: 32px; height: 18px; background: var(--border); border-radius: 18px; position: relative; transition: 0.2s; }
+        .toggle-slider:before { content: ""; position: absolute; width: 12px; height: 12px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: 0.2s; }
+        input:checked + .toggle-slider { background: var(--accent); }
+        input:checked + .toggle-slider:before { transform: translateX(14px); }
+
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
     </style>
 </head>
 <body>
 
     <header>
-        <div class="logo">⚡ OmniMind <span>Academic Suite</span></div>
+        <div class="logo">⚡ OmniMind <span>Ultimate v100x</span></div>
         <div class="header-controls">
+            <label class="toggle-switch" title="Toggle Real-Time Google Search Grounding for Latest Events">
+                <input type="checkbox" id="webSearchToggle" checked>
+                <span class="toggle-slider"></span>
+                <span>🌐 Real-Time Search</span>
+            </label>
+            <label class="toggle-switch" title="Auto Read Out Answer After Generation">
+                <input type="checkbox" id="autoSpeechToggle">
+                <span class="toggle-slider"></span>
+                <span>🔊 Auto-Read</span>
+            </label>
+            <select id="voiceLangSelect" title="Select Input Voice & Speech Translation Language">
+                <option value="en-US">Voice: English (US)</option>
+                <option value="es-ES">Voice: Spanish (Español)</option>
+                <option value="fr-FR">Voice: French (Français)</option>
+                <option value="de-DE">Voice: German (Deutsch)</option>
+                <option value="hi-IN">Voice: Hindi (हिन्दी)</option>
+                <option value="zh-CN">Voice: Chinese (中文)</option>
+            </select>
             <select id="personaSelect">
                 <option value="tutor">Persona: Exam & Study Tutor</option>
+                <option value="analyst">Persona: Politics & World News Analyst</option>
                 <option value="coder">Persona: Code Architect</option>
                 <option value="general">Persona: General Assistant</option>
             </select>
             <select id="modelSelect">
-                <option value="gemini-3.5-flash-lite">Gemini 3.5 Lite (Fast)</option>
-                <option value="gemini-3.6-flash">Gemini 3.6 Flash</option>
-                <option value="gemini-3.1-pro-preview">Gemini 3.1 Pro</option>
+                <option value="gemini-2.5-flash">Gemini 2.5 Flash (Fast + Search)</option>
+                <option value="gemini-2.5-pro">Gemini 2.5 Pro (Deep Analysis)</option>
             </select>
             <button class="nav-btn" id="artifactToggleBtn" title="Toggle Artifact Panel">📋 Artifacts</button>
             <button class="nav-btn" id="themeToggleBtn">☀️</button>
@@ -166,8 +200,8 @@
         <div class="chat-container" id="chatContainer">
             <div class="ai-wrapper">
                 <div class="message ai-message">
-                    <div class="meta-info">✓ Academic Suite Active</div>
-                    <div class="answer-content">Ready for exam questions. Headings and answers are fully separated, completely free of symbols like #, *, or +.</div>
+                    <div class="meta-info">✓ Academic & Real-Time Suite Active</div>
+                    <div class="answer-content">OmniMind Ultimate v100x ready. Ask political, current news, academic, or code questions with real-time web verification and multitenant speech capabilities!</div>
                 </div>
             </div>
         </div>
@@ -178,7 +212,7 @@
                 <button id="closeArtifactBtn" style="background:transparent; border:none; color:var(--text-muted); cursor:pointer; font-weight:bold;">✕</button>
             </div>
             <div id="artifactContent" style="font-size:0.88rem; color:var(--text-muted); line-height:1.5;">
-                Clean separated question and answer breakdowns will render here automatically.
+                Clean structured content renders here automatically.
             </div>
         </div>
     </div>
@@ -189,10 +223,10 @@
             <button id="removeAttachmentBtn" style="background:transparent; border:none; color:var(--danger); cursor:pointer; font-weight:bold;">✕ Remove</button>
         </div>
         <div class="input-container">
-            <input type="file" id="fileInput" style="display:none" accept="image/*,.txt">
-            <button class="action-btn" id="attachBtn" title="Attach">📎</button>
-            <button class="action-btn" id="micBtn" title="Voice">🎙️</button>
-            <input type="text" id="userInput" placeholder="Enter exam question (e.g., What is OOPs? Explain concepts)...">
+            <input type="file" id="fileInput" style="display:none" accept="image/*,.txt,.pdf,.csv">
+            <button class="action-btn" id="attachBtn" title="Attach Document/Image">📎</button>
+            <button class="action-btn" id="micBtn" title="Speak to Voice Translate & Query">🎙️</button>
+            <input type="text" id="userInput" placeholder="Ask anything (e.g., Current political news, Quantum physics, OOPs concepts)...">
             <button class="send-btn" id="sendBtn">Send</button>
         </div>
     </div>
@@ -200,11 +234,13 @@
     <script>
         let attachedFileData = null;
         let attachedFileName = '';
+        let attachedMimeType = '';
         let currentTheme = localStorage.getItem('omni_theme') || 'dark';
         let userApiKey = localStorage.getItem('omni_custom_api_key') || '';
         let recognition = null;
         let isListening = false;
         let activeController = null;
+        let currentSpeechUtterance = null;
 
         window.onload = function() {
             if (currentTheme === 'light') {
@@ -233,6 +269,7 @@
             document.getElementById('micBtn').onclick = toggleSpeechRecognition;
             document.getElementById('sendBtn').onclick = processUserQuery;
             document.getElementById('userInput').onkeypress = (e) => { if (e.key === 'Enter') processUserQuery(); };
+            document.getElementById('voiceLangSelect').onchange = updateSpeechLanguage;
         }
 
         function saveInlineApiKey() {
@@ -241,7 +278,7 @@
             if(userApiKey) {
                 document.getElementById('keyStatusText').textContent = '🔑 API Key: Saved ✓';
                 document.getElementById('keyStatusText').style.color = 'var(--success)';
-                alert("API Key saved!");
+                alert("API Key saved successfully!");
             } else {
                 document.getElementById('keyStatusText').textContent = '🔑 API Key: Not Saved';
                 document.getElementById('keyStatusText').style.color = 'var(--text-muted)';
@@ -260,8 +297,8 @@
         }
 
         function clearHistory() {
-            if (confirm("Clear chat workspace?")) {
-                localStorage.removeItem('omni_history_v111');
+            if (confirm("Clear all history from workspace?")) {
+                localStorage.removeItem('omni_history_v100x');
                 document.getElementById('chatContainer').innerHTML = `<div class="ai-wrapper"><div class="message ai-message"><div class="meta-info">✓ Reset</div><div class="answer-content">Workspace cleared.</div></div></div>`;
             }
         }
@@ -269,6 +306,7 @@
         function clearAttachment() {
             attachedFileData = null;
             attachedFileName = '';
+            attachedMimeType = '';
             document.getElementById('attachmentBar').style.display = 'none';
             document.getElementById('fileInput').value = '';
         }
@@ -277,9 +315,10 @@
             const file = event.target.files[0];
             if (!file) return;
             attachedFileName = file.name;
+            attachedMimeType = file.type || 'text/plain';
             const reader = new FileReader();
             reader.onload = function(e) {
-                attachedFileData = e.target.result;
+                attachedFileData = e.target.result.split(',')[1] || e.target.result;
                 document.getElementById('attachmentName').textContent = `Attached: ${attachedFileName}`;
                 document.getElementById('attachmentBar').style.display = 'flex';
             };
@@ -292,6 +331,7 @@
                 recognition = new SpeechRecognition();
                 recognition.continuous = false;
                 recognition.interimResults = false;
+                updateSpeechLanguage();
                 recognition.onresult = (e) => {
                     document.getElementById('userInput').value = e.results[0][0].transcript;
                     stopListeningUI();
@@ -302,10 +342,21 @@
             }
         }
 
+        function updateSpeechLanguage() {
+            if (recognition) {
+                recognition.lang = document.getElementById('voiceLangSelect').value;
+            }
+        }
+
         function toggleSpeechRecognition() {
-            if (!recognition) return alert("Speech recognition not supported.");
+            if (!recognition) return alert("Voice recognition not supported in this browser.");
             if (isListening) { recognition.stop(); stopListeningUI(); }
-            else { recognition.start(); isListening = true; document.getElementById('micBtn').classList.add('mic-active'); }
+            else { 
+                updateSpeechLanguage();
+                recognition.start(); 
+                isListening = true; 
+                document.getElementById('micBtn').classList.add('mic-active'); 
+            }
         }
 
         function stopListeningUI() {
@@ -313,14 +364,24 @@
             document.getElementById('micBtn').classList.remove('mic-active');
         }
 
+        function readAnswerAloud(textToRead) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel(); // Stop any active speech
+                const cleanText = textToRead.replace(/<[^>]*>/g, ''); // Strip HTML tags
+                currentSpeechUtterance = new SpeechSynthesisUtterance(cleanText);
+                currentSpeechUtterance.lang = document.getElementById('voiceLangSelect').value;
+                window.speechSynthesis.speak(currentSpeechUtterance);
+            }
+        }
+
         function saveMessageToStorage(sender, htmlContent) {
-            let history = JSON.parse(localStorage.getItem('omni_history_v111') || '[]');
+            let history = JSON.parse(localStorage.getItem('omni_history_v100x') || '[]');
             history.push({ sender, content: htmlContent });
-            localStorage.setItem('omni_history_v111', JSON.stringify(history));
+            localStorage.setItem('omni_history_v100x', JSON.stringify(history));
         }
 
         function loadChatHistory() {
-            let history = JSON.parse(localStorage.getItem('omni_history_v111') || '[]');
+            let history = JSON.parse(localStorage.getItem('omni_history_v100x') || '[]');
             const chatContainer = document.getElementById('chatContainer');
             history.forEach(item => {
                 const wrapper = document.createElement('div');
@@ -331,7 +392,6 @@
             chatContainer.scrollTop = chatContainer.scrollHeight;
         }
 
-        // Strict cleaner to completely strip markdown symbols (#, *, +) and separate headings vs answer paragraphs cleanly
         function cleanMarkdownFormatting(rawText) {
             let cleaned = rawText
                 .replace(/#{1,6}\s?/g, '') 
@@ -346,7 +406,6 @@
                 let trimmed = line.trim();
                 if (!trimmed) return;
                 
-                // Classify short lines or ending colons or numbered items as separate distinct headings
                 if (trimmed.endsWith(':') || /^\d+\./.test(trimmed) || (trimmed.length < 40 && !trimmed.includes('.'))) {
                     formattedHtml += `<div class="academic-heading-block">${escapeHtml(trimmed)}</div>`;
                 } else {
@@ -362,6 +421,9 @@
             const chatContainer = document.getElementById('chatContainer');
             const modelSelect = document.getElementById('modelSelect');
             const personaSelect = document.getElementById('personaSelect');
+            const enableWebSearch = document.getElementById('webSearchToggle').checked;
+            const autoSpeech = document.getElementById('autoSpeechToggle').checked;
+            const voiceLang = document.getElementById('voiceLangSelect').value;
 
             const text = userInput.value.trim();
             if (!text && !attachedFileData) return;
@@ -377,7 +439,6 @@
             saveMessageToStorage('user', displayHtml);
             
             userInput.value = '';
-            clearAttachment();
             chatContainer.scrollTop = chatContainer.scrollHeight;
 
             const aiWrapper = document.createElement('div');
@@ -385,10 +446,10 @@
             aiWrapper.innerHTML = `
                 <div class="message ai-message">
                     <div class="meta-info loading" style="display:flex; justify-content:space-between; align-items:center;">
-                        <span>Structuring clear academic headings and answers...</span>
+                        <span>Fetching real-time grounding & analyzing...</span>
                         <button class="stop-gen-btn" id="stopGenBtn" style="display:inline-block;">Stop ⏹️</button>
                     </div>
-                    <div class="answer-content">Formatting clean response...</div>
+                    <div class="answer-content">Analyzing query...</div>
                 </div>`;
             chatContainer.appendChild(aiWrapper);
             chatContainer.scrollTop = chatContainer.scrollHeight;
@@ -398,59 +459,98 @@
             stopBtn.onclick = () => activeController.abort();
 
             let responseText = "";
-            let sourceText = `Engine: ${selectedModelName} | Clean Separated Layout`;
+            let groundingSources = [];
 
             try {
                 if (userApiKey) {
                     const apiEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/${selectedModelCode}:generateContent?key=${userApiKey}`;
                     
-                    let systemInstruction = "You are an expert exam tutor. Provide clear structured exam answers with distinct headings on separate lines and detailed answer text underneath. Do NOT include markdown symbols like hashes (#), asterisks (*), or plus signs (+) anywhere in your text.";
-                    let fullPrompt = `${systemInstruction} Question: "${text}".`;
+                    let systemInstruction = `You are OmniMind Ultimate v100x. Persona: ${personaSelect.value}. Provide direct, highly accurate, up-to-date answers. Format response in clear structured headings on separate lines and detailed answer text underneath. Language setting: ${voiceLang}. Do NOT include markdown symbols like hashes (#), asterisks (*), or plus signs (+) anywhere in your text.`;
+                    
+                    let requestBody = {
+                        contents: [{
+                            parts: [{ text: `${systemInstruction}\nUser Question: ${text}` }]
+                        }]
+                    };
+
+                    // Attach web search grounding if enabled
+                    if (enableWebSearch) {
+                        requestBody.tools = [{ googleSearch: {} }];
+                    }
+
+                    // Attach file image/doc if present
+                    if (attachedFileData) {
+                        requestBody.contents[0].parts.push({
+                            inline_data: {
+                                mime_type: attachedMimeType,
+                                data: attachedFileData
+                            }
+                        });
+                    }
 
                     const apiResponse = await fetch(apiEndpoint, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ contents: [{ parts: [{ text: fullPrompt }] }] }),
+                        body: JSON.stringify(requestBody),
                         signal: activeController.signal
                     });
                     
                     const data = await apiResponse.json();
                     if (data.candidates && data.candidates[0].content) {
                         responseText = data.candidates[0].content.parts[0].text;
+                        
+                        // Extract Grounding Citations & Sources from Google Search Tool
+                        const searchChunks = data.candidates[0].groundingMetadata?.groundingChunks;
+                        if (searchChunks && searchChunks.length > 0) {
+                            searchChunks.forEach((chunk, idx) => {
+                                if (chunk.web) {
+                                    groundingSources.push(`<a href="${chunk.web.uri}" target="_blank" class="citation-badge" title="${escapeHtml(chunk.web.title)}">[Source ${idx+1}: ${escapeHtml(chunk.web.title)}]</a>`);
+                                }
+                            });
+                        }
                     } else {
-                        responseText = data.error ? `API Error: ${data.error.message}` : "Invalid response structure.";
+                        responseText = data.error ? `API Error: ${data.error.message}` : "Invalid API response structure.";
                     }
                 } else {
                     await new Promise(r => setTimeout(r, 400));
-                    responseText = `Definition\nAdvanced Object-Oriented Programming extends basic concepts to build modular and reusable software.\n\nMain Concepts\n1. Class\nA blueprint that defines the data and functions of an object.\n2. Object\nAn instance of a class that represents a real-world entity.`;
+                    responseText = `Definition\nOmniMind provides real-time information processing with clean heading-answer separation.\n\nLatest Grounded Updates\nConnected to live web reference engines for real-time political, economic, and technical events.`;
                 }
 
+                clearAttachment();
                 let cleanedContentHtml = cleanMarkdownFormatting(responseText);
 
                 let questionDisplayBox = `<div class="academic-q-box">Question: ${escapeHtml(text)}</div>`;
                 let finalAnswerBlock = `${questionDisplayBox}${cleanedContentHtml}`;
 
-                let chipsHtml = `
-                    <div class="followup-chips">
-                        <button class="chip-btn" onclick="document.getElementById('userInput').value='Explain with more examples'; processUserQuery();">💡 Add More Examples</button>
-                        <button class="chip-btn" onclick="document.getElementById('userInput').value='Give exam marks breakdown'; processUserQuery();">📊 Marks Breakdown</button>
-                    </div>`;
+                let ttsButtonHtml = `<button class="tts-btn" onclick="readAnswerAloud(\`${escapeHtml(responseText)}\`)">🔊 Read Answer Aloud</button>`;
 
                 let sourcesHtml = `
                     <div class="sources-box">
-                        <span>${escapeHtml(sourceText)}</span>
-                        <a href="https://www.google.com/search?q=${encodeURIComponent(text)}" target="_blank" class="action-chip-btn">🔍 Search Reference ↗</a>
-                    </div>${chipsHtml}`;
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <span>Engine: ${selectedModelName} | Grounded Real-Time Verification</span>
+                            ${ttsButtonHtml}
+                        </div>
+                        ${groundingSources.length > 0 ? `<div class="grounding-links"><strong>References:</strong> ${groundingSources.join(' ')}</div>` : ''}
+                    </div>
+                    <div class="followup-chips">
+                        <button class="chip-btn" onclick="document.getElementById('userInput').value='Explain in deeper detail with current political/real-world news impact'; processUserQuery();">💡 Deep News & Politics Analysis</button>
+                        <button class="chip-btn" onclick="document.getElementById('userInput').value='Give 5 key takeaways and summary'; processUserQuery();">📊 Key Takeaways</button>
+                    </div>`;
 
                 document.getElementById('artifactContent').innerHTML = finalAnswerBlock;
 
                 const aiHtml = `
-                    <div class="meta-info">✓ Structured Heading & Answer Format</div>
+                    <div class="meta-info">✓ Up-to-Date Grounded Answer</div>
                     <div class="answer-content">${finalAnswerBlock}</div>
                     ${sourcesHtml}`;
                 
                 aiWrapper.querySelector('.message').innerHTML = aiHtml;
                 saveMessageToStorage('ai', aiHtml);
+
+                if (autoSpeech) {
+                    readAnswerAloud(responseText);
+                }
+
             } catch (err) {
                 aiWrapper.querySelector('.message').innerHTML = `<div class="answer-content" style="color:var(--danger);">Error: ${err.message}</div>`;
             }
@@ -458,7 +558,7 @@
         }
 
         function escapeHtml(str) {
-            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+            return str ? str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;") : '';
         }
     </script>
 </body>
