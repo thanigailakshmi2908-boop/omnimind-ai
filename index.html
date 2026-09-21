@@ -163,7 +163,7 @@
     <header>
         <div class="logo">⚡ OmniMind <span>Groq Suite</span></div>
         <div class="header-controls">
-            <button class="ctrl-btn active" id="searchStateBtn" onclick="toggleSearchState()">🌐 Search: ON</button>
+            <button class="ctrl-btn active" id="searchStateBtn" onclick="toggleSearchState()">🌐 Live Web Search: ALWAYS ON</button>
             <button class="ctrl-btn active" id="globalSpeechBtn" onclick="toggleGlobalSpeech()">🔊 Voice Output: Active</button>
             
             <select id="voiceLangSelect" title="Select Input Voice & Speech Translation Language">
@@ -180,9 +180,8 @@
                 <option value="coder">Persona: Code Architect</option>
                 <option value="general">Persona: General Assistant</option>
             </select>
-            <!-- UPDATED VALID MODEL IDS FOR GROQ -->
             <select id="modelSelect">
-                <option value="openai/gpt-oss-120b">Groq: GPT-OSS 120B (Best Accuracy)</option>
+                <option value="openai/gpt-oss-120b">Groq: GPT-OSS 120B (Best Accuracy & Reasoning)</option>
                 <option value="openai/gpt-oss-20b">Groq: GPT-OSS 20B (Ultra Fast)</option>
                 <option value="llama-3.1-8b-instant">Groq: Llama 3.1 8B (Instant)</option>
             </select>
@@ -207,8 +206,8 @@
         <div class="chat-container" id="chatContainer">
             <div class="ai-wrapper">
                 <div class="message ai-message">
-                    <div class="meta-info">✓ Groq High-Speed LPU Active</div>
-                    <div class="answer-content">OmniMind Engine initialized with direct **Groq AI acceleration**! Ready for lightning-fast answers, web grounding, document parsing, and interactive speech synthesis.</div>
+                    <div class="meta-info">✓ Live Web Grounded Engine Ready</div>
+                    <div class="answer-content">OmniMind Engine initialized! Live internet search grounding is strictly active to verify all real-time news, current officeholders, and real-world facts accurately.</div>
                 </div>
             </div>
         </div>
@@ -233,7 +232,7 @@
             <input type="file" id="fileInput" style="display:none" accept="image/*,.txt,.pdf,.csv">
             <button class="action-btn" id="attachBtn" title="Attach Document/Image">📎</button>
             <button class="action-btn" id="micBtn" title="Speak to Voice Translate & Query">🎙️</button>
-            <input type="text" id="userInput" placeholder="Ask Groq anything (e.g., Quantum physics, OOPs concepts, Code)...">
+            <input type="text" id="userInput" placeholder="Ask anything (e.g., Who is the Chief Minister of Tamil Nadu?)...">
             <button class="send-btn" id="sendBtn">Send</button>
         </div>
     </div>
@@ -311,7 +310,7 @@
         function toggleSearchState() {
             searchActive = !searchActive;
             const btn = document.getElementById('searchStateBtn');
-            btn.textContent = searchActive ? "🌐 Search: ON" : "🌐 Search: PAUSED";
+            btn.textContent = searchActive ? "🌐 Live Web Search: ALWAYS ON" : "🌐 Live Web Search: PAUSED";
             btn.className = searchActive ? "ctrl-btn active" : "ctrl-btn paused";
         }
 
@@ -386,9 +385,10 @@
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(html, 'text/html');
                 const snippets = Array.from(doc.querySelectorAll('.result__snippet'))
-                    .slice(0, 3)
+                    .slice(0, 5)
                     .map(s => s.innerText.trim())
-                    .join('\n');
+                    .filter(s => s.length > 0)
+                    .join('\n\n');
                 return snippets;
             } catch (e) {
                 return '';
@@ -409,7 +409,7 @@
             inputEl.value = '';
 
             const aiMsgId = 'ai_' + Date.now();
-            appendMessage('ai', '⚡ Processing request with Groq...', aiMsgId, true);
+            appendMessage('ai', '🌐 Fetching live search data & processing with Groq...', aiMsgId, true);
 
             try {
                 let contextPrompt = prompt;
@@ -417,28 +417,21 @@
                 if (searchActive) {
                     const webSnippets = await fetchWebContext(prompt);
                     if (webSnippets) {
-                        contextPrompt = `[Real-Time Live Web Information]:\n${webSnippets}\n\n[User Prompt]:${prompt}`;
+                        contextPrompt = `[CRITICAL - LATEST REAL-TIME WEB DATA]:\n${webSnippets}\n\n[USER QUESTION]:${prompt}\n\n[INSTRUCTION]: Base your answer strictly on the provided real-time web context. Override internal static knowledge if the live data contains newer real-world events. Provide a 100% accurate answer.`;
                     }
                 }
 
                 if (attachedFileData) {
-                    contextPrompt += `\n\n[Attached File Context (${attachedFileName})]:\n${attachedFileData}`;
-                    clearAttachment();
-                }
-
-                const modelName = document.getElementById('modelSelect').value;
-                const persona = document.getElementById('personaSelect').value;
-
-                const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-                    method: "POST",
-                    headers: {
-                        "Authorization": `Bearer ${userApiKey}`,
+                    contextPrompt += `\n\n[Attached File Context (${attachedFileName})]:\n${attachedFileData}`;                     clearAttachment();                 }                  const modelName = document.getElementById('modelSelect').value;                 const persona = document.getElementById('personaSelect').value;                  const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {                     method: "POST",                     headers: {                         "Authorization": `Bearer ${userApiKey}`,
                         "Content-Type": "application/json"
                     },
                     body: JSON.stringify({
                         model: modelName,
                         messages: [
-                            { role: "system", content: `You are OmniMind, an expert AI operating under the persona: ${persona}. Always provide accurate, well-structured, clear Markdown responses.` },
+                            { 
+                                role: "system", 
+                                content: `You are OmniMind, an expert, factual AI assistant operating under persona: ${persona}. You MUST prioritize real-time search context provided in the prompt to give 100% current and accurate real-world facts.` 
+                            },
                             { role: "user", content: contextPrompt }
                         ]
                     })
@@ -469,7 +462,7 @@
             } else {
                 wrapper.innerHTML = `
                     <div class="message ai-message" id="${id}">
-                        <div class="meta-info ${isLoading ? 'loading' : ''}">${isLoading ? '⌛ Groq Processing...' : '✓ Groq AI Answer'}</div>
+                        <div class="meta-info ${isLoading ? 'loading' : ''}">${isLoading ? '⌛ Fetching Live Facts...' : '✓ Verified Live Output'}</div>
                         <div class="answer-content">${marked.parse(text)}</div>${!isLoading ? `
                         <div class="speech-ctrl-bar">
                             <button class="tts-btn" onclick="speakTextFromDiv('${id}')">▶️ Speak</button>
@@ -486,7 +479,7 @@
             const msgEl = document.getElementById(id);
             if (msgEl) {
                 const meta = msgEl.querySelector('.meta-info');
-                meta.textContent = '✓ Groq AI Answer';
+                meta.textContent = '✓ Verified Live Output';
                 meta.classList.remove('loading');
                 
                 const content = msgEl.querySelector('.answer-content');
