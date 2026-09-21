@@ -106,24 +106,6 @@
         
         .answer-content { margin-top: 4px; font-size: 0.98rem; flex: 1; }
         
-        .academic-q-box { font-size: 1.1rem; font-weight: 700; color: #38bdf8; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
-        .academic-heading-block { font-size: 1.02rem; font-weight: 700; color: var(--accent); margin-top: 18px; margin-bottom: 6px; letter-spacing: 0.3px; }
-        .academic-answer-block { font-size: 0.96rem; color: var(--text-main); margin-bottom: 12px; padding-left: 12px; border-left: 3px solid var(--accent); line-height: 1.7; background: rgba(255, 255, 255, 0.01); }
-
-        .citation-badge { background: rgba(99, 102, 241, 0.15); color: #818cf8; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 700; text-decoration: none; border: 1px solid rgba(99, 102, 241, 0.3); vertical-align: super; margin-left: 4px; }
-        .citation-badge:hover { background: rgba(99, 102, 241, 0.3); }
-
-        .sources-box { margin-top: 14px; font-size: 0.8rem; background: rgba(0,0,0,0.2); padding: 10px 14px; border-radius: 6px; border-left: 3px solid var(--accent); color: var(--text-muted); display: flex; flex-direction: column; gap: 8px; }
-        .light-theme .sources-box { background: #f1f5f9; }
-        .grounding-links { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
-
-        .followup-chips { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
-        .chip-btn { background: rgba(56, 189, 248, 0.1); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); padding: 5px 12px; border-radius: 16px; font-size: 0.78rem; cursor: pointer; font-weight: 600; transition: 0.2s; }
-        .chip-btn:hover { background: rgba(56, 189, 248, 0.25); }
-
-        .action-chip-btn { background: var(--accent); border: none; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; cursor: pointer; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; }
-        .action-chip-btn:hover { background: var(--accent-hover); }
-        
         .speech-ctrl-bar { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
         .tts-btn { background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); padding: 4px 10px; border-radius: 6px; font-size: 0.78rem; cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; }
         .tts-btn:hover { background: rgba(16, 185, 129, 0.3); }
@@ -137,13 +119,6 @@
         button.send-btn { background-color: var(--accent); color: white; border: none; padding: 10px 18px; border-radius: 8px; cursor: pointer; font-weight: 600; }
         button.action-btn { background-color: var(--panel-bg); border: 1px solid var(--border); padding: 8px 10px; border-radius: 8px; color: var(--text-main); cursor: pointer; font-size: 0.9rem; }
         button.mic-active { background-color: var(--danger) !important; color: white; animation: pulse 1.5s infinite; }
-        
-        .toggle-switch { display: flex; align-items: center; gap: 6px; font-size: 0.8rem; color: var(--text-muted); cursor: pointer; }
-        .toggle-switch input { display: none; }
-        .toggle-slider { width: 32px; height: 18px; background: var(--border); border-radius: 18px; position: relative; transition: 0.2s; }
-        .toggle-slider:before { content: ""; position: absolute; width: 12px; height: 12px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: 0.2s; }
-        input:checked + .toggle-slider { background: var(--accent); }
-        input:checked + .toggle-slider:before { transform: translateX(14px); }
 
         /* Welcome Modal Styles */
         .modal-overlay {
@@ -207,9 +182,9 @@
                 <option value="general">Persona: General Assistant</option>
             </select>
             <select id="modelSelect">
-                <option value="llama-3.3-70b-versatile">Groq: Llama 3.3 70B (Recommended)</option>
-                <option value="llama-3.1-8b-instant">Groq: Llama 3.1 8B Instant (Ultra Fast)</option>
-                <option value="mixtral-8x7b-32768">Groq: Mixtral 8x7B</option>
+                <option value="openai/gpt-oss-120b">Groq: GPT-OSS 120B (High Reasoning)</option>
+                <option value="openai/gpt-oss-20b">Groq: GPT-OSS 20B (Ultra Fast)</option>
+                <option value="qwen/qwen3.8-27b">Groq: Qwen 3.8 27B</option>
             </select>
             <button class="nav-btn" id="artifactToggleBtn" title="Toggle Artifact Panel">📋 Artifacts</button>
             <button class="nav-btn" id="themeToggleBtn">☀️</button>
